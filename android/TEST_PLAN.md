@@ -111,3 +111,11 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Repetir con .mcworld y .mctemplate cuando el editor soporte esos tipos.
 - Sin Minecraft instalado, la exportación debe conservar el archivo y mostrar el selector de apps/fallback.
 - Confirmar que la URI se comparte con permiso temporal de lectura y que Minecraft puede leer el ZIP.
+
+
+## Panel de proyecto desplegable
+
+- Al arrancar en teléfono, el panel lateral debe estar cerrado.
+- Pulsar “☰ Proyecto”: debe abrirse como panel flotante sin cambiar a horizontal.
+- Pulsar Atrás con el panel abierto: debe cerrarlo antes de cambiar de pestaña o salir.
+- En pantallas angostas el botón puede reducirse al icono ☰ y no debe cubrir las pestañas.

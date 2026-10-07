@@ -146,6 +146,11 @@ public final class MainActivity extends Activity {
           };
 
           window.__BMS_ANDROID_BACK__ = function() {
+            if (!document.documentElement.classList.contains('android-sidebar-collapsed')) {
+              document.documentElement.classList.add('android-sidebar-collapsed');
+              return 'handled';
+            }
+
             const launcher = document.getElementById('projectLauncher');
             if (launcher && !launcher.hidden) {
               const close = document.getElementById('closeLauncherBtn');
@@ -194,6 +199,18 @@ public final class MainActivity extends Activity {
 
           const setupAndroidUi = () => {
             if (!document.body || document.getElementById('androidDock')) return;
+
+            document.documentElement.classList.add('android-sidebar-collapsed');
+
+            const projectToggle = document.createElement('button');
+            projectToggle.id = 'androidProjectToggle';
+            projectToggle.className = 'android-project-toggle';
+            projectToggle.type = 'button';
+            projectToggle.innerHTML = '<span>☰</span><b>Proyecto</b>';
+            projectToggle.addEventListener('click', () => {
+              document.documentElement.classList.toggle('android-sidebar-collapsed');
+            });
+            document.body.appendChild(projectToggle);
 
             const dock = document.createElement('nav');
             dock.id = 'androidDock';

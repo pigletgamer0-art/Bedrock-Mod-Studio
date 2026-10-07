@@ -110,3 +110,26 @@ html.android-native body{min-height:100dvh;overscroll-behavior-y:contain}
   .android-native .android-dock{left:auto;right:12px;top:50%;bottom:auto;transform:translateY(-50%);width:72px;grid-template-columns:1fr}
   .android-native .android-dock button{min-height:58px}
 }
+
+
+/* Android native — compact project drawer */
+.android-native.android-sidebar-collapsed .sidebar{display:none}
+.android-native:not(.android-sidebar-collapsed) .sidebar{
+  display:block;position:fixed;z-index:95;left:8px;right:8px;top:8px;height:auto;max-height:min(74dvh,660px);
+  overflow:auto;border:1px solid #414a57;border-radius:16px;background:#12151af5;
+  box-shadow:0 20px 70px #000d;backdrop-filter:blur(18px);padding:14px
+}
+.android-project-toggle{
+  position:fixed;z-index:84;left:10px;top:10px;display:flex;align-items:center;gap:7px;
+  min-height:38px;padding:7px 10px;border-radius:11px;background:#171c24ee;border:1px solid #39424e;
+  box-shadow:0 7px 25px #0007;backdrop-filter:blur(12px)
+}
+.android-project-toggle span{font-size:17px}.android-project-toggle b{font-size:11px}
+.android-native .topbar{padding-left:105px}
+.android-native:not(.android-sidebar-collapsed) .android-project-toggle{background:#1c2920;border-color:#467b55;color:var(--accent)}
+.android-keyboard-open .android-project-toggle{display:none}
+@media(max-width:430px) and (orientation:portrait){
+  .android-project-toggle b{display:none}
+  .android-project-toggle{width:40px;justify-content:center;padding:6px}
+  .android-native .topbar{padding-left:54px}
+}
