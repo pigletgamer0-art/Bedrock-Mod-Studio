@@ -49,9 +49,23 @@ jobs:
       - name: Build debug APK
         run: gradle -p android assembleDebug --stacktrace --no-daemon
 
+      - name: Validate APK contents
+        run: |
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          unzip -t "$APK" >/dev/null
+          unzip -l "$APK" | grep -q 'classes.dex'
+          unzip -l "$APK" | grep -q 'AndroidManifest.xml'
+          unzip -l "$APK" | grep -q 'assets/www/index.html'
+          unzip -l "$APK" | grep -q 'assets/www/app.js'
+          unzip -l "$APK" | grep -q 'assets/www/bundle/00.b64'
+          sha256sum "$APK" | tee android/app/build/outputs/apk/debug/app-debug.sha256
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Bedrock-Mod-Studio-Android-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/app-debug.sha256
           if-no-files-found: error
