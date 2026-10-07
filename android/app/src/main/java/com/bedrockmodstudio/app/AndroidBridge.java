@@ -157,6 +157,15 @@ public final class AndroidBridge {
     }
 
     @JavascriptInterface
+    public void pickMinecraftPackage() {
+        activity.runOnUiThread(() -> {
+            if (activity instanceof MainActivity) {
+                ((MainActivity) activity).openMinecraftPackagePicker();
+            }
+        });
+    }
+
+    @JavascriptInterface
     public void openExternal(String url) {
         try {
             Uri uri = Uri.parse(url);

@@ -42,6 +42,7 @@ import java.util.Locale;
 
 public final class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4107;
+    private static final int PACKAGE_PICKER_REQUEST = 4108;
     private static final int MAX_NATIVE_IMPORT_BYTES = 8 * 1024 * 1024;
     private static final String APP_ORIGIN = "https://appassets.androidplatform.net";
     private static final String APP_URL = APP_ORIGIN + "/assets/www/index.html";
@@ -278,7 +279,10 @@ public final class MainActivity extends Activity {
                   '<button data-proxy-tool="model"><span>🧊</span><b>Modelo 3D</b><small>Geometría + UV</small></button>',
                   '<button data-proxy-tool="animation"><span>🎞️</span><b>Animación</b><small>Timeline por huesos</small></button>',
                 '</div></div>',
-                '<div class="android-create-section"><h3>Proyecto</h3><button class="android-project-create" data-proxy-new-project="true"><span>＋</span><div><b>Nuevo proyecto</b><small>Add-On completo, una sola cosa, pack de texturas, textura o modelo.</small></div><strong>›</strong></button></div>',
+                '<div class="android-create-section"><h3>Proyecto</h3>',
+                  '<button class="android-project-create" data-proxy-new-project="true"><span>＋</span><div><b>Nuevo proyecto</b><small>Add-On completo, una sola cosa, pack de texturas, textura o modelo.</small></div><strong>›</strong></button>',
+                  '<button class="android-project-create" data-proxy-import-package="true"><span>⇩</span><div><b>Importar Add-On</b><small>Abrir .mcpack o .mcaddon como proyecto editable.</small></div><strong>›</strong></button>',
+                '</div>',
               '</section>'
             ].join('');
             document.body.appendChild(sheet);
@@ -320,6 +324,10 @@ public final class MainActivity extends Activity {
             sheet.querySelector('[data-proxy-new-project]')?.addEventListener('click', () => {
               closeSheet();
               document.getElementById('newProjectBtn')?.click();
+            });
+            sheet.querySelector('[data-proxy-import-package]')?.addEventListener('click', () => {
+              closeSheet();
+              AndroidBridge.pickMinecraftPackage();
             });
 
             const searchInput = document.getElementById('androidCreationSearch');
@@ -791,9 +799,36 @@ public final class MainActivity extends Activity {
         } catch (ActivityNotFoundException ignored) { }
     }
 
+    void openMinecraftPackagePicker() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/zip", "application/octet-stream"});
+        try {
+            startActivityForResult(intent, PACKAGE_PICKER_REQUEST);
+        } catch (ActivityNotFoundException error) {
+            Toast.makeText(this, "No encontré un selector de archivos.", Toast.LENGTH_LONG).show();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PACKAGE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                Uri uri = data.getData();
+                pendingIncomingUri = uri;
+                pendingIncomingName = queryDisplayName(uri);
+                pendingIncomingMime = getContentResolver().getType(uri);
+                if (pendingIncomingMime == null || pendingIncomingMime.trim().isEmpty()) {
+                    pendingIncomingMime = "application/octet-stream";
+                }
+                deliverPendingIncomingFile();
+            }
+            return;
+        }
+
         if (requestCode != FILE_CHOOSER_REQUEST || filePathCallback == null) return;
         Uri[] result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
         filePathCallback.onReceiveValue(result);

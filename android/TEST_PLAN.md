@@ -172,3 +172,12 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Conservar texturas/modelos/sonidos como binarios.
 - Rechazar rutas ../, demasiadas entradas, >16 MB por archivo o >64 MB descomprimidos.
 - Guardar el proyecto convertido y volver a abrirlo desde “Mis proyectos”.
+
+
+## Botón Importar Add-On
+
+- Abrir el botón + y tocar “Importar Add-On”.
+- Debe aparecer el selector de documentos Android sin salir de Bedrock Mod Studio.
+- Elegir un .mcpack y un .mcaddon válidos: ambos deben pasar por el importador seguro y abrirse como proyecto.
+- Elegir un archivo con otra extensión: la app debe rechazarlo con mensaje y continuar funcionando.
+- Cancelar el selector: la app debe volver sin cambiar el proyecto actual.
