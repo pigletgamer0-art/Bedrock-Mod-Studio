@@ -16,8 +16,8 @@ Android solo se marca 100% cuando se cumplan TODOS estos gates:
 - [x] Autosave nativo interno.
 - [x] Edge-to-edge / notch / system bars.
 - [x] WebView aislado para funcionamiento offline.
-- [ ] CI llega al compilador Android.
-- [ ] APK debug compila.
+- [x] CI llega al compilador Android.
+- [x] APK debug compila.
 - [ ] APK se instala y arranca en dispositivo real.
 - [ ] Prueba offline real.
 - [ ] Importación/exportación real en Android.
@@ -28,10 +28,10 @@ Android solo se marca 100% cuando se cumplan TODOS estos gates:
 
 ## Estado medible
 
-La mayoría de las funciones Android ya están implementadas en código, pero el porcentaje verificado todavía es menor porque no se ha logrado llegar al compilador.
+La mayoría de las funciones Android ya están implementadas y el primer APK debug ya compiló correctamente en GitHub Actions. Aún faltan instalación y pruebas funcionales en un dispositivo real.
 
 **Implementación de funciones:** aproximadamente 80%.
-**Verificación real end-to-end:** aproximadamente 55–60%.
+**Verificación real end-to-end:** aproximadamente 70%.
 
 No se debe reportar 100% hasta tener APK y pruebas reales.
 
@@ -67,3 +67,18 @@ El archivo `android/CI_WORKFLOW_FIXED.yml` contiene el reemplazo preparado:
 - artifact APK
 
 El conector actual puede escribir código normal del repositorio, pero GitHub bloquea la actualización directa del archivo protegido `.github/workflows/android.yml`. Por eso se conserva aquí la versión exacta que debe reemplazarlo cuando exista permiso de workflows.
+
+
+## Primera APK compilada
+
+- Workflow: Android APK Build Branch
+- Run: 37652720638
+- Commit de build: 04093915d00feb0dbc9a7d57bc3ea8c1a2b25f95
+- Artifact: Bedrock-Mod-Studio-Android-debug
+- APK: app-debug.apk
+- Tamaño: 2,559,117 bytes
+- SHA-256 del APK extraído: 817a10b64a0fa89ed12ccd594d8959c59f8bbf740cae958bf0e9b39d99876e9d
+- assembleDebug: PASS
+- upload-artifact: PASS
+
+Pendiente: instalar esta APK en Android real y completar TEST_PLAN.md.

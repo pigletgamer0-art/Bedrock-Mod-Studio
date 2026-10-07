@@ -31,14 +31,15 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core:1.19.1")
+    implementation("androidx.core:core:1.17.0")
     implementation("androidx.webkit:webkit:1.17.1")
 }
 
 val webRoot = rootProject.projectDir.parentFile
-val generatedWebAssets = layout.buildDirectory.dir("generated/bmsWebAssets")
+val generatedWebAssets = layout.buildDirectory.dir("generated/bmsWebAssets").get().asFile
+val generatedWebWww = generatedWebAssets.resolve("www")
 
-val syncWebAssets by tasks.registering(Copy::class) {
+val syncWebAssets = tasks.register<Copy>("syncWebAssets") {
     from(webRoot) {
         include("index.html")
         include("styles.css")
@@ -47,7 +48,7 @@ val syncWebAssets by tasks.registering(Copy::class) {
         include("sw.js")
         include("bundle/**")
     }
-    into(generatedWebAssets.map { it.dir("www") })
+    into(generatedWebWww)
 }
 
 android.sourceSets.getByName("main").assets.srcDir(generatedWebAssets)

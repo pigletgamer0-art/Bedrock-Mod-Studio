@@ -80,7 +80,7 @@ public final class MainActivity extends Activity {
               const bytes = new Uint8Array(await blob.arrayBuffer());
               const chunkBytes = 192 * 1024;
 
-              if (window.__BMS_AUTOSAVE_CAPTURE__ && /\.bmsproject\.json$/i.test(filename || '')) {
+              if (window.__BMS_AUTOSAVE_CAPTURE__ && /\\.bmsproject\\.json$/i.test(filename || '')) {
                 AndroidBridge.beginAutosave();
                 for (let offset = 0; offset < bytes.length; offset += chunkBytes) {
                   AndroidBridge.appendAutosaveChunk(toBase64(bytes.subarray(offset, Math.min(bytes.length, offset + chunkBytes))));
@@ -90,7 +90,7 @@ public final class MainActivity extends Activity {
                 return;
               }
 
-              const openAfter = /\.(mcaddon|mcpack|mcworld)$/i.test(filename || '');
+              const openAfter = /\\.(mcaddon|mcpack|mcworld)$/i.test(filename || '');
               AndroidBridge.beginFile(filename || 'bedrock-mod-studio-export.bin', blob.type || 'application/octet-stream', openAfter);
               for (let offset = 0; offset < bytes.length; offset += chunkBytes) {
                 AndroidBridge.appendFileChunk(toBase64(bytes.subarray(offset, Math.min(bytes.length, offset + chunkBytes))));
