@@ -43,6 +43,9 @@ jobs:
         with:
           gradle-version: '9.6.0'
 
+      - name: Restore stable debug signing key
+        run: base64 -d android/ci/debug.keystore.b64 > android/app/bms-debug.keystore
+
       - name: Build debug APK
         run: gradle -p android assembleDebug --stacktrace --no-daemon
 

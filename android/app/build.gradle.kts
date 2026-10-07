@@ -10,8 +10,20 @@ android {
         applicationId = "com.bedrockmodstudio.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0-alpha"
+        versionCode = 2
+        versionName = "0.1.2-alpha"
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            val stableDebugKeystore = file("bms-debug.keystore")
+            if (stableDebugKeystore.exists()) {
+                storeFile = stableDebugKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
     }
 
     buildTypes {

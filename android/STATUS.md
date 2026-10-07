@@ -82,3 +82,13 @@ El conector actual puede escribir código normal del repositorio, pero GitHub bl
 - upload-artifact: PASS
 
 Pendiente: instalar esta APK en Android real y completar TEST_PLAN.md.
+
+
+## Firma Alpha estable
+
+Desde Android v0.1.2 Alpha, CI restaura una clave **debug pública y exclusiva para pruebas** desde `android/ci/debug.keystore.b64`.
+Su único objetivo es permitir instalar una nueva Alpha encima de la anterior sin cambiar de certificado en cada runner de GitHub Actions.
+
+- Esta clave NO se usará para release/Play Store.
+- La futura firma release será privada y no se guardará en el repositorio.
+- SHA-256 del keystore debug: `332d6896a54e09032129b463edcb25b5b20181e0ff4040c8bd75425b9f0ea881`.
