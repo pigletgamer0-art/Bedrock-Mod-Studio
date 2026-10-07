@@ -90,7 +90,7 @@ public final class MainActivity extends Activity {
                 return;
               }
 
-              const openAfter = /\\.(mcaddon|mcpack|mcworld)$/i.test(filename || '');
+              const openAfter = /\\.(mcaddon|mcpack|mcworld|mctemplate)$/i.test(filename || '');
               const projectSnapshot = /\\.bmsproject\\.json$/i.test(filename || '');
               AndroidBridge.beginFile(filename || 'bedrock-mod-studio-export.bin', blob.type || 'application/octet-stream', openAfter);
               if (projectSnapshot) AndroidBridge.beginProjectSnapshot(filename);
