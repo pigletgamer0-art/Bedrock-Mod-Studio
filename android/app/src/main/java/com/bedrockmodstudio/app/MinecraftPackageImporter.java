@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.util.Base64;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
@@ -186,7 +187,7 @@ final class MinecraftPackageImporter {
             if (normalized != null && data != null) files.put(normalized, data);
         }
 
-        JSONObject toProjectJson() {
+        JSONObject toProjectJson() throws JSONException {
             JSONObject root = new JSONObject();
             root.put("format", "bedrock-mod-studio-project");
             root.put("version", 6);
@@ -241,7 +242,7 @@ final class MinecraftPackageImporter {
             return root;
         }
 
-        private JSONArray inferContent() {
+        private JSONArray inferContent() throws JSONException {
             JSONArray out = new JSONArray();
             List<String> seen = new ArrayList<>();
             for (String path : files.keySet()) {
