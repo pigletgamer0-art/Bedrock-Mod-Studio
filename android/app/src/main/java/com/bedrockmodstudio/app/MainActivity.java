@@ -303,7 +303,7 @@ public final class MainActivity extends Activity {
               if (!textureList || !fileTree) return;
               const pngs = [...fileTree.querySelectorAll('[data-path]')]
                 .map((row) => row.dataset.path)
-                .filter((path) => /\.png$/i.test(path || ''));
+                .filter((path) => /\\.png$/i.test(path || ''));
               if (!pngs.length) {
                 textureList.hidden = true;
                 textureList.innerHTML = '';
