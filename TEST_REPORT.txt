@@ -1,0 +1,37 @@
+Bedrock Mod Studio v0.6 Alpha — Test Report
+Date: 2026-10-07
+
+PASS — JavaScript syntax
+  node --check app.js
+
+PASS — UI selector integrity
+  145 HTML ids checked against direct $('#id') references in app.js.
+  Missing referenced ids: 0.
+  Duplicate HTML ids: 0.
+
+PASS — Simulated runtime startup
+  app.js executed inside a lightweight fake DOM/runtime without throwing.
+  This specifically exercises initialization and catches the v0.5 crypto.randomUUID bug.
+
+PASS — Creator Lab generators
+  Shaped recipe generated and JSON-parsed successfully.
+  Recipe result identifier checked.
+  Weighted loot table generated with two entries and parsed successfully.
+  Spawn rules generated with identifier, weight, brightness and herd data and parsed successfully.
+
+PASS — Minimal "Una sola cosa" packaging logic
+  Recipe-only element project: BP manifest present, RP manifest absent, BP has no RP dependency.
+  Visual item element project: RP manifest becomes present automatically.
+
+PASS — Model helper tools
+  Duplicate cube increases selected bone cube count.
+  Mirror X changes origin to -originX-sizeX.
+
+PASS — PWA file references
+  index.html, app.js, styles.css, manifest.webmanifest and sw.js are present.
+  Service-worker cache name: bms-v0.6.
+
+LIMITATION — Full Chromium E2E
+  Chromium headless is installed in the container but does not terminate reliably here (DBus/headless environment issue), so this build is not claimed as a full visual browser E2E pass.
+
+Official Bedrock structures used by the new Creator Lab were cross-checked against current Microsoft Learn documentation for shaped/shapeless recipes, loot tables and spawn rules.
