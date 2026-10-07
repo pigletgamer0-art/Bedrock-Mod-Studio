@@ -765,18 +765,25 @@ public final class MainActivity extends Activity {
         pendingIncomingMime = null;
 
         String lower = fileName.toLowerCase(Locale.ROOT);
-        if (!(lower.endsWith(".png") || lower.endsWith(".geo.json") || lower.endsWith(".bmsproject.json"))) {
+        boolean minecraftPackage = lower.endsWith(".mcaddon") || lower.endsWith(".mcpack");
+        if (!(lower.endsWith(".png") || lower.endsWith(".geo.json") || lower.endsWith(".bmsproject.json") || minecraftPackage)) {
             Toast.makeText(this, "Ese archivo todavía no se puede importar directamente: " + fileName, Toast.LENGTH_LONG).show();
             return;
         }
 
         new Thread(() -> {
             try {
-                byte[] bytes = readIncomingFile(uri);
+                byte[] bytes = minecraftPackage
+                        ? MinecraftPackageImporter.convert(this, uri, fileName)
+                        : readIncomingFile(uri);
+                String deliveredName = minecraftPackage
+                        ? fileName.replaceAll("(?i)\\.(mcaddon|mcpack)$", "") + ".bmsproject.json"
+                        : fileName;
+                String deliveredMime = minecraftPackage ? "application/json" : mime;
                 String base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
                 String js = "window.__BMS_NATIVE_RECEIVE__ && window.__BMS_NATIVE_RECEIVE__("
-                        + JSONObject.quote(fileName) + ","
-                        + JSONObject.quote(mime) + ","
+                        + JSONObject.quote(deliveredName) + ","
+                        + JSONObject.quote(deliveredMime) + ","
                         + JSONObject.quote(base64) + ");";
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(js, null);

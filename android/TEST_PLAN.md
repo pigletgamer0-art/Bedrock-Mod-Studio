@@ -161,3 +161,15 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Borrar una copia interna: debe desaparecer de “Mis proyectos” sin borrar el archivo exportado en Descargas.
 - El listado debe ordenar los proyectos por fecha de modificación más reciente.
 - Un proyecto interno mayor a 12 MB no debe cargarse directamente al WebView.
+
+
+## Importar .mcpack / .mcaddon
+
+- Desde Archivos Android, usar Abrir con Bedrock Mod Studio sobre un .mcpack.
+- La app debe detectar si el pack es Behavior Pack o Resource Pack usando manifest.json y convertirlo a proyecto v0.6.
+- Abrir un .mcaddon con BP + RP internos y confirmar que ambos aparecen bajo BP/ y RP/.
+- Confirmar que items, blocks, entities, recipes, loot, spawn y script reconocidos aparecen en “Lo que has creado”.
+- Texturas/modelos y archivos no textuales deben conservarse como binarios.
+- Probar un ZIP con ../ o rutas absolutas: no debe escribir ni importar fuera del proyecto.
+- Probar demasiadas entradas o archivos internos >16 MB: la importación debe abortar con mensaje, no congelar la app.
+- Guardar el proyecto convertido y volver a abrirlo desde “Mis proyectos”.
