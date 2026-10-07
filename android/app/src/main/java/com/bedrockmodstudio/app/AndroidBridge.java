@@ -45,10 +45,6 @@ public final class AndroidBridge {
     private File autosaveTemp;
     private BufferedOutputStream autosaveOutput;
 
-    private File projectSnapshotTemp;
-    private BufferedOutputStream projectSnapshotOutput;
-    private String projectSnapshotName;
-
     private File projectTemp;
     private BufferedOutputStream projectOutput;
     private String projectSnapshotName;

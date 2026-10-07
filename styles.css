@@ -218,18 +218,3 @@ html.android-native body{min-height:100dvh;overscroll-behavior-y:contain}
 .android-project-open b,.android-project-open small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .android-project-open small{color:var(--muted);font-size:10px;margin-top:3px}
 .android-project-remove{width:38px;min-height:52px;padding:0;border-radius:12px;background:#24171a;color:#e8a0a8;border:1px solid #4e2f35;font-size:20px}
-
-
-/* Android native — local project library */
-.android-project-library{margin:0 0 10px;padding:10px;border:1px solid #2c3540;border-radius:13px;background:#0d1217}
-.android-library-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.android-library-head>div b,.android-library-head>div small{display:block}
-.android-library-head>div small{font-size:10px;color:var(--muted);margin-top:2px}
-#androidSaveToLibrary{min-height:36px;padding:7px 10px;border-radius:10px;background:#17321f;color:#a7efb4}
-.android-project-library-list{display:grid;gap:6px}
-.android-library-empty{padding:12px;border:1px dashed #34404c;border-radius:10px;color:var(--muted);font-size:11px;text-align:center}
-.android-project-row{display:grid;grid-template-columns:minmax(0,1fr) 38px;gap:6px;align-items:stretch}
-.android-project-open{min-width:0;text-align:left;padding:9px 10px;border:1px solid #303945;border-radius:10px;background:#151a20}
-.android-project-open b,.android-project-open small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.android-project-open small{font-size:9px;color:var(--muted);margin-top:2px}
-.android-project-delete{width:38px;min-height:38px;border-radius:10px;padding:0;font-size:22px;color:#f0a5ad;background:#28171a;border-color:#5a2d34}

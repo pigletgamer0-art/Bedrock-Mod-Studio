@@ -90,6 +90,19 @@ public final class MainActivity extends Activity {
                 return;
               }
 
+              if (window.__BMS_LIBRARY_CAPTURE__ && /\\.bmsproject\\.json$/i.test(filename || '')) {
+                let internalName = String(window.__BMS_LIBRARY_PROJECT_NAME__ || filename || 'Proyecto').trim();
+                if (!internalName.toLowerCase().endsWith('.bmsproject.json')) internalName += '.bmsproject.json';
+                AndroidBridge.beginProjectSnapshot(internalName);
+                for (let offset = 0; offset < bytes.length; offset += chunkBytes) {
+                  AndroidBridge.appendProjectSnapshotChunk(toBase64(bytes.subarray(offset, Math.min(bytes.length, offset + chunkBytes))));
+                }
+                AndroidBridge.finishProjectSnapshot();
+                window.__BMS_LIBRARY_CAPTURE__ = false;
+                window.dispatchEvent(new Event('bms-project-library-changed'));
+                return;
+              }
+
               const openAfter = /\\.(mcaddon|mcpack|mcworld|mctemplate)$/i.test(filename || '');
               const projectSnapshot = /\\.bmsproject\\.json$/i.test(filename || '');
               AndroidBridge.beginFile(filename || 'bedrock-mod-studio-export.bin', blob.type || 'application/octet-stream', openAfter);
@@ -227,10 +240,6 @@ public final class MainActivity extends Activity {
                 '<div><span class="eyebrow">TU PROYECTO</span><h2>Lo que has creado</h2><small>Todo tu contenido en un solo lugar.</small></div>',
                 '<button id="androidCreatePlus" class="android-create-plus" type="button" aria-label="Crear">+</button>',
               '</div>',
-              '<div class="android-project-library">',
-                '<div class="android-library-head"><div><b>Mis proyectos</b><small>Guardados dentro de la app</small></div><button id="androidSaveToLibrary" type="button">Guardar actual</button></div>',
-                '<div id="androidProjectLibraryList" class="android-project-library-list"></div>',
-              '</div>',
               '<div class="android-home-tools"><label class="android-home-search"><span>⌕</span><input id="androidCreationSearch" type="search" placeholder="Buscar en lo que has creado..." autocomplete="off"></label><span id="androidCreationCount" class="android-creation-count">0</span></div>',
               '<div id="androidProjectLibrary" class="android-project-library"></div>',
               '<div id="androidHomeContent" class="android-home-content"></div>',
@@ -313,79 +322,6 @@ public final class MainActivity extends Activity {
               document.getElementById('newProjectBtn')?.click();
             });
 
-            const libraryList = document.getElementById('androidProjectLibraryList');
-            const formatBytes = (value) => {
-              const bytes = Number(value || 0);
-              if (bytes < 1024) return bytes + ' B';
-              if (bytes < 1024 * 1024) return Math.round(bytes / 102.4) / 10 + ' KB';
-              return Math.round(bytes / 104857.6) / 10 + ' MB';
-            };
-            const renderProjectLibrary = () => {
-              if (!libraryList) return;
-              let projects = [];
-              try { projects = JSON.parse(AndroidBridge.listProjectSnapshots() || '[]'); } catch (_) {}
-              libraryList.replaceChildren();
-              if (!projects.length) {
-                const empty = document.createElement('div');
-                empty.className = 'android-library-empty';
-                empty.textContent = 'Todavía no guardas proyectos aquí.';
-                libraryList.appendChild(empty);
-                return;
-              }
-              projects.forEach((project) => {
-                const row = document.createElement('div');
-                row.className = 'android-project-row';
-
-                const open = document.createElement('button');
-                open.type = 'button';
-                open.className = 'android-project-open';
-                const title = document.createElement('b');
-                title.textContent = project.name || 'Proyecto';
-                const meta = document.createElement('small');
-                const dateText = project.modified ? new Date(Number(project.modified)).toLocaleString() : '';
-                meta.textContent = formatBytes(project.size) + (dateText ? ' · ' + dateText : '');
-                open.append(title, meta);
-                open.addEventListener('click', () => {
-                  const base64 = AndroidBridge.getProjectSnapshotBase64(project.id);
-                  if (!base64) {
-                    AndroidBridge.notifyError('No pude leer ese proyecto');
-                    return;
-                  }
-                  const bytes = fromBase64(base64);
-                  const file = new File([bytes], project.id, { type: 'application/json' });
-                  const transfer = new DataTransfer();
-                  transfer.items.add(file);
-                  const input = document.getElementById('loadProjectInput');
-                  if (!input) return;
-                  input.files = transfer.files;
-                  input.dispatchEvent(new Event('change', { bubbles: true }));
-                });
-
-                const remove = document.createElement('button');
-                remove.type = 'button';
-                remove.className = 'android-project-delete';
-                remove.textContent = '×';
-                remove.setAttribute('aria-label', 'Eliminar ' + (project.name || 'proyecto'));
-                remove.addEventListener('click', () => {
-                  if (!confirm('¿Eliminar "' + (project.name || 'Proyecto') + '" de Mis proyectos?')) return;
-                  AndroidBridge.deleteProjectSnapshot(project.id);
-                  renderProjectLibrary();
-                });
-
-                row.append(open, remove);
-                libraryList.appendChild(row);
-              });
-            };
-            document.getElementById('androidSaveToLibrary')?.addEventListener('click', () => {
-              if (window.__BMS_LIBRARY_CAPTURE__) return;
-              window.__BMS_LIBRARY_CAPTURE__ = true;
-              window.__BMS_LIBRARY_PROJECT_NAME__ = document.getElementById('projectName')?.value || 'Proyecto';
-              document.getElementById('saveProjectBtn')?.click();
-              setTimeout(() => { window.__BMS_LIBRARY_CAPTURE__ = false; }, 2500);
-            });
-            window.addEventListener('bms-project-library-changed', renderProjectLibrary);
-            renderProjectLibrary();
-
             const searchInput = document.getElementById('androidCreationSearch');
             const creationCount = document.getElementById('androidCreationCount');
             const noResults = document.getElementById('androidNoCreationResults');
@@ -414,7 +350,15 @@ public final class MainActivity extends Activity {
 
               const title = document.createElement('div');
               title.className = 'android-project-library-title';
-              title.innerHTML = '<div><b>📁 Mis proyectos</b><small>Copias guardadas dentro de la app</small></div><span>' + projects.length + '</span>';
+              title.innerHTML = '<div><b>📁 Mis proyectos</b><small>Guardados dentro de la app</small></div><div class="android-project-library-actions"><span>' + projects.length + '</span><button type="button">Guardar actual</button></div>';
+              const saveCurrent = title.querySelector('button');
+              saveCurrent?.addEventListener('click', () => {
+                if (window.__BMS_LIBRARY_CAPTURE__) return;
+                window.__BMS_LIBRARY_CAPTURE__ = true;
+                window.__BMS_LIBRARY_PROJECT_NAME__ = document.getElementById('projectName')?.value || 'Proyecto';
+                document.getElementById('saveProjectBtn')?.click();
+                setTimeout(() => { window.__BMS_LIBRARY_CAPTURE__ = false; }, 15000);
+              });
               projectLibrary.appendChild(title);
 
               if (!projects.length) {
