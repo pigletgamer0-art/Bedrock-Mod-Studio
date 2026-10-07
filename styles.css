@@ -22,3 +22,67 @@
 .creator-lab-card{margin-top:18px}.creator-lab-tabs{display:flex;gap:7px;flex-wrap:wrap}.lab-tab.active{border-color:var(--accent);color:var(--accent);background:#122018}.lab-page[hidden]{display:none}.lab-grid{display:grid;grid-template-columns:minmax(240px,.65fr) minmax(0,1.35fr);gap:14px}.lab-grid label{display:block;color:var(--muted);font-size:12px;margin:8px 0}.lab-grid input,.lab-grid select,.lab-grid textarea{width:100%;margin-top:4px;background:#0d0f13;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:8px}.lab-grid textarea{resize:vertical;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.muted{display:block;color:var(--muted);font-size:11px;margin-top:5px}.recipe-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}.recipe-grid input{aspect-ratio:1.65;text-align:center;font-size:11px;padding:6px;min-width:0}.creator-lab-card code{font-size:11px}.model-controls .row-between span{flex-wrap:wrap}.pixel-actions input[type=file]{display:none}
 .workspace[data-project-type="texture"] .creator-lab-card,.workspace[data-project-type="texture_pack"] .creator-lab-card,.workspace[data-project-type="model"] .creator-lab-card{display:none}
 @media(max-width:900px){.lab-grid{grid-template-columns:1fr}.creator-lab-tabs{width:100%}.creator-lab-tabs button{flex:1}.recipe-grid input{font-size:10px}}
+
+/* Android native — portrait first */
+html.android-native{background:var(--bg);overscroll-behavior:none}
+html.android-native body{min-height:100dvh;overscroll-behavior-y:contain}
+@media (orientation:portrait){
+  .android-native .app-shell{display:block;min-height:100dvh}
+  .android-native .sidebar{position:relative;top:auto;height:auto;max-height:32dvh;overflow:auto;padding:12px 14px;border-right:0;border-bottom:1px solid var(--line)}
+  .android-native .brand{margin-bottom:10px}
+  .android-native .brand-cube{width:36px;height:36px;font-size:19px;border-radius:9px}
+  .android-native .project-kind-card{margin:9px 0 10px}
+  .android-native .project-meta.compact{display:grid;grid-template-columns:1fr 1fr;gap:7px 8px}
+  .android-native .project-meta.compact label{margin:0}
+  .android-native .project-meta.compact label:last-child{grid-column:1/-1}
+  .android-native .panel-title{margin:11px 0 6px}
+  .android-native .file-tree{max-height:82px;overflow:auto}
+  .android-native .workspace{min-height:68dvh}
+  .android-native .topbar{height:auto;min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:7px;padding:8px 10px;position:sticky;top:0}
+  .android-native .tabs{order:1;width:100%;display:flex;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+  .android-native .tabs::-webkit-scrollbar{display:none}
+  .android-native .tab{flex:0 0 auto;min-height:40px;white-space:nowrap}
+  .android-native .actions{order:2;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .android-native .actions button{min-height:42px}
+  .android-native .actions #saveProjectBtn{display:none}
+  .android-native .tab-page{padding:10px 10px 24px}
+  .android-native .hero{padding:10px 2px 16px;gap:10px}
+  .android-native .hero h1{font-size:25px}
+  .android-native .hero p{font-size:14px;margin:0}
+  .android-native .hero-status{width:100%}
+  .android-native .grid.two,
+  .android-native .model-layout,
+  .android-native .advanced-model-layout,
+  .android-native .pixel-layout,
+  .android-native .code-layout,
+  .android-native .animation-project-grid,
+  .android-native .uv-layout,
+  .android-native .lab-grid{grid-template-columns:1fr}
+  .android-native .card{padding:12px;border-radius:12px}
+  .android-native .card-head{align-items:flex-start}
+  .android-native .card-head>.toolbar{width:100%}
+  .android-native .toolbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}
+  .android-native .toolbar button,.android-native .toolbar select{flex:0 0 auto}
+  .android-native .create-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .android-native .create-card{padding:12px}
+  .android-native .canvas-model-preview{min-height:250px}
+  .android-native .canvas-model-preview canvas{max-height:340px}
+  .android-native .model-view-controls{grid-template-columns:1fr}
+  .android-native .uv-summary{grid-template-columns:1fr 1fr}
+  .android-native .animation-grid{grid-template-columns:1fr}
+  .android-native .timeline-track{grid-template-columns:82px minmax(0,1fr)}
+  .android-native .timeline-track-label{font-size:10px}
+  .android-native .timeline-tracks{max-height:280px}
+  .android-native .pixel-actions{display:grid;grid-template-columns:1fr 1fr}
+  .android-native .pixel-actions>select,
+  .android-native .pixel-actions>input{grid-column:1/-1}
+  .android-native #pixelCanvas{width:min(92vw,620px);height:min(92vw,620px)}
+  .android-native .canvas-wrap{padding:10px}
+  .android-native .code-files{grid-template-columns:1fr 1fr}
+  .android-native #codeEditor{min-height:56dvh;padding:13px;font-size:12px}
+  .android-native .launcher-grid{grid-template-columns:1fr}
+  .android-native .modal-backdrop{align-items:flex-end;padding:0}
+  .android-native .modal{width:100%;max-height:92dvh;border-radius:18px 18px 0 0;border-bottom:0;padding:14px 14px max(14px,env(safe-area-inset-bottom))}
+  .android-native .creator-lab-tabs{display:grid;grid-template-columns:repeat(3,1fr)}
+  .android-native .creator-lab-tabs button{min-width:0;padding-left:8px;padding-right:8px}
+}
