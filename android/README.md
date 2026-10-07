@@ -53,3 +53,15 @@ android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 GitHub Actions también construye el APK automáticamente y lo publica como artefacto del workflow.
+
+
+## UX Android vertical
+
+La app añade una capa específica para teléfono:
+
+- Dock inferior con **Nuevo**, **Diseño**, **Pixel**, **Código** y **Exportar**.
+- El dock se oculta cuando se abre el teclado para no tapar el editor.
+- `windowSoftInputMode=adjustResize` permite que el WebView reduzca su altura con el teclado.
+- El botón Atrás cierra primero el selector de proyecto, luego vuelve a Diseño y solo después sale de la app.
+- Android puede enviar directamente a Bedrock Mod Studio archivos `.png`, `.geo.json` y `.bmsproject.json` mediante **Abrir con** o **Compartir**.
+- La importación nativa directa tiene un límite de 8 MB para evitar bloquear el WebView; los selectores internos siguen disponibles para los flujos normales.

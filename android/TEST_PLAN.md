@@ -76,3 +76,13 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Código Java: pendiente de compilación completa en un entorno con Android SDK.
 - Gradle/Android SDK: pendiente de compilación real.
 - GitHub Actions: workflow de build creado; los commits realizados mediante el conector no iniciaron un run automáticamente, por lo que aún no se considera una prueba de compilación.
+
+
+## Pruebas de UX nativa añadidas
+
+- Abrir el teclado dentro de Código y confirmar que el dock inferior desaparece y el textarea sigue visible.
+- Pulsar Atrás desde Pixel/Código: debe volver a Diseño antes de cerrar la app.
+- Pulsar Atrás con el modal de proyecto abierto: debe cerrar el modal.
+- Desde Archivos/Galería, usar **Abrir con** o **Compartir** con un PNG y comprobar que llega a Pixel Studio.
+- Repetir con un `.geo.json` y un `.bmsproject.json`.
+- Intentar enviar un archivo no compatible y confirmar que la app avisa sin fallar.

@@ -86,3 +86,27 @@ html.android-native body{min-height:100dvh;overscroll-behavior-y:contain}
   .android-native .creator-lab-tabs{display:grid;grid-template-columns:repeat(3,1fr)}
   .android-native .creator-lab-tabs button{min-width:0;padding-left:8px;padding-right:8px}
 }
+
+/* Android native — portrait quick dock and keyboard */
+.android-native body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.android-dock{
+  position:fixed;left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:80;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;
+  padding:6px;background:#101419ee;border:1px solid #343c48;border-radius:16px;
+  box-shadow:0 12px 38px #000b;backdrop-filter:blur(16px)
+}
+.android-dock button{
+  min-width:0;min-height:49px;padding:5px 2px;border:0;background:transparent;border-radius:11px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted)
+}
+.android-dock button>span{font-size:19px;line-height:1}
+.android-dock button>small{font-size:9px;line-height:1.1;white-space:nowrap}
+.android-dock button.active{background:#1c2920;color:var(--accent)}
+.android-dock button.native-export{background:#17321f;color:#9ef0ae}
+.android-keyboard-open body{padding-bottom:0}
+.android-keyboard-open .android-dock{display:none}
+@media(min-width:600px) and (orientation:landscape){
+  .android-native body{padding-bottom:0}
+  .android-native .android-dock{left:auto;right:12px;top:50%;bottom:auto;transform:translateY(-50%);width:72px;grid-template-columns:1fr}
+  .android-native .android-dock button{min-height:58px}
+}

@@ -4,9 +4,13 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
+import android.util.Base64;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
 import android.webkit.ValueCallback;
@@ -15,6 +19,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.webkit.WebViewAssetLoader;
@@ -22,10 +27,17 @@ import androidx.webkit.WebViewClientCompat;
 import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
 
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
+import java.util.Locale;
 
 public final class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 4107;
+    private static final int MAX_NATIVE_IMPORT_BYTES = 8 * 1024 * 1024;
     private static final String APP_ORIGIN = "https://appassets.androidplatform.net";
     private static final String APP_URL = APP_ORIGIN + "/assets/www/index.html";
 
@@ -47,6 +59,13 @@ public final class MainActivity extends Activity {
             let binary = '';
             for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
             return btoa(binary);
+          };
+
+          const fromBase64 = (value) => {
+            const binary = atob(value);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes;
           };
 
           const sendBlob = async (href, filename) => {
@@ -84,11 +103,116 @@ public final class MainActivity extends Activity {
             }
             return originalOpen ? originalOpen.apply(window, arguments) : null;
           };
+
+          window.__BMS_NATIVE_RECEIVE__ = function(name, mime, base64) {
+            try {
+              const lower = String(name || '').toLowerCase();
+              let input = null;
+              if (lower.endsWith('.png')) input = document.getElementById('importTextureInput');
+              else if (lower.endsWith('.geo.json')) input = document.getElementById('importGeoInput');
+              else if (lower.endsWith('.bmsproject.json')) input = document.getElementById('loadProjectInput');
+
+              if (!input) {
+                AndroidBridge.notifyError('Ese archivo no se puede importar directamente todavía: ' + name);
+                return false;
+              }
+
+              const bytes = fromBase64(base64);
+              const file = new File([bytes], name, { type: mime || 'application/octet-stream' });
+              const transfer = new DataTransfer();
+              transfer.items.add(file);
+              input.files = transfer.files;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+              return true;
+            } catch (error) {
+              AndroidBridge.notifyError(error && error.message ? error.message : String(error));
+              return false;
+            }
+          };
+
+          window.__BMS_ANDROID_BACK__ = function() {
+            const launcher = document.getElementById('projectLauncher');
+            if (launcher && !launcher.hidden) {
+              const close = document.getElementById('closeLauncherBtn');
+              if (close) close.click();
+              else launcher.hidden = true;
+              return 'handled';
+            }
+
+            const active = document.querySelector('.tab.active');
+            if (active && active.dataset.tab && active.dataset.tab !== 'designer') {
+              const designer = document.querySelector('.tab[data-tab="designer"]');
+              if (designer) designer.click();
+              return 'handled';
+            }
+            return 'exit';
+          };
+
+          const setupAndroidUi = () => {
+            if (!document.body || document.getElementById('androidDock')) return;
+
+            const dock = document.createElement('nav');
+            dock.id = 'androidDock';
+            dock.className = 'android-dock';
+            dock.setAttribute('aria-label', 'Accesos rápidos Android');
+            dock.innerHTML = [
+              '<button type="button" data-native-action="new"><span>＋</span><small>Nuevo</small></button>',
+              '<button type="button" data-native-tab="designer"><span>◆</span><small>Diseño</small></button>',
+              '<button type="button" data-native-tab="pixel"><span>▦</span><small>Pixel</small></button>',
+              '<button type="button" data-native-tab="code"><span>⌘</span><small>Código</small></button>',
+              '<button type="button" class="native-export" data-native-action="export"><span>↑</span><small>Exportar</small></button>'
+            ].join('');
+            document.body.appendChild(dock);
+
+            const syncDock = () => {
+              const activeTab = document.querySelector('.tab.active')?.dataset?.tab || '';
+              dock.querySelectorAll('[data-native-tab]').forEach((button) => {
+                button.classList.toggle('active', button.dataset.nativeTab === activeTab);
+              });
+            };
+
+            dock.addEventListener('click', (event) => {
+              const button = event.target.closest('button');
+              if (!button) return;
+              if (button.dataset.nativeTab) {
+                document.querySelector('.tab[data-tab="' + button.dataset.nativeTab + '"]')?.click();
+                syncDock();
+                return;
+              }
+              if (button.dataset.nativeAction === 'new') document.getElementById('newProjectBtn')?.click();
+              if (button.dataset.nativeAction === 'export') document.getElementById('exportBtn')?.click();
+            });
+
+            document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', syncDock));
+            syncDock();
+
+            const viewport = window.visualViewport;
+            if (viewport) {
+              let maxHeight = viewport.height;
+              const updateKeyboard = () => {
+                maxHeight = Math.max(maxHeight, viewport.height);
+                document.documentElement.classList.toggle('android-keyboard-open', viewport.height < maxHeight * 0.72);
+              };
+              viewport.addEventListener('resize', updateKeyboard);
+              viewport.addEventListener('scroll', updateKeyboard);
+              updateKeyboard();
+            }
+          };
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupAndroidUi, { once: true });
+          } else {
+            setupAndroidUi();
+          }
         })();
         """;
 
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
+    private volatile boolean pageReady;
+    private Uri pendingIncomingUri;
+    private String pendingIncomingName;
+    private String pendingIncomingMime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +228,8 @@ public final class MainActivity extends Activity {
         setContentView(webView);
 
         configureWebView();
+        handleIncomingIntent(getIntent());
+
         if (savedInstanceState == null) {
             webView.loadUrl(APP_URL);
         } else {
@@ -157,7 +283,10 @@ public final class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                view.evaluateJavascript(NATIVE_DOWNLOAD_HOOK, null);
+                view.evaluateJavascript(NATIVE_DOWNLOAD_HOOK, ignored -> {
+                    pageReady = true;
+                    deliverPendingIncomingFile();
+                });
             }
         });
 
@@ -200,6 +329,123 @@ public final class MainActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
+    }
+
+    private void handleIncomingIntent(Intent intent) {
+        if (intent == null) return;
+
+        Uri uri = null;
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            uri = intent.getData();
+        } else if (Intent.ACTION_SEND.equals(intent.getAction())) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                uri = intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri.class);
+            } else {
+                @SuppressWarnings("deprecation")
+                Uri legacyUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                uri = legacyUri;
+            }
+        }
+
+        if (uri == null) return;
+
+        pendingIncomingUri = uri;
+        pendingIncomingName = queryDisplayName(uri);
+        pendingIncomingMime = intent.getType();
+        if (pendingIncomingMime == null || pendingIncomingMime.isBlank()) {
+            pendingIncomingMime = getContentResolver().getType(uri);
+        }
+        if (pendingIncomingMime == null) pendingIncomingMime = "application/octet-stream";
+
+        intent.setData(null);
+        intent.removeExtra(Intent.EXTRA_STREAM);
+
+        if (pageReady) deliverPendingIncomingFile();
+    }
+
+    private void deliverPendingIncomingFile() {
+        final Uri uri = pendingIncomingUri;
+        final String fileName = pendingIncomingName;
+        final String mime = pendingIncomingMime;
+
+        if (!pageReady || uri == null || fileName == null) return;
+        pendingIncomingUri = null;
+        pendingIncomingName = null;
+        pendingIncomingMime = null;
+
+        String lower = fileName.toLowerCase(Locale.ROOT);
+        if (!(lower.endsWith(".png") || lower.endsWith(".geo.json") || lower.endsWith(".bmsproject.json"))) {
+            Toast.makeText(this, "Ese archivo todavía no se puede importar directamente: " + fileName, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                byte[] bytes = readIncomingFile(uri);
+                String base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                String js = "window.__BMS_NATIVE_RECEIVE__ && window.__BMS_NATIVE_RECEIVE__("
+                        + JSONObject.quote(fileName) + ","
+                        + JSONObject.quote(mime) + ","
+                        + JSONObject.quote(base64) + ");";
+                runOnUiThread(() -> {
+                    if (webView != null) webView.evaluateJavascript(js, null);
+                });
+            } catch (Exception error) {
+                runOnUiThread(() -> Toast.makeText(
+                        this,
+                        "No pude importar " + fileName + ": " + error.getMessage(),
+                        Toast.LENGTH_LONG
+                ).show());
+            }
+        }, "bms-native-import").start();
+    }
+
+    private byte[] readIncomingFile(Uri uri) throws IOException {
+        try (InputStream input = getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            if (input == null) throw new IOException("Android no pudo abrir el archivo");
+            byte[] buffer = new byte[32 * 1024];
+            int read;
+            int total = 0;
+            while ((read = input.read(buffer)) != -1) {
+                total += read;
+                if (total > MAX_NATIVE_IMPORT_BYTES) {
+                    throw new IOException("El archivo supera el límite de importación directa de 8 MB");
+                }
+                output.write(buffer, 0, read);
+            }
+            return output.toByteArray();
+        }
+    }
+
+    private String queryDisplayName(Uri uri) {
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+            try (Cursor cursor = getContentResolver().query(
+                    uri,
+                    new String[]{OpenableColumns.DISPLAY_NAME},
+                    null,
+                    null,
+                    null
+            )) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (index >= 0) {
+                        String value = cursor.getString(index);
+                        if (value != null && !value.isBlank()) return value;
+                    }
+                }
+            } catch (Exception ignored) { }
+        }
+
+        String segment = uri.getLastPathSegment();
+        return segment == null || segment.isBlank() ? "archivo_importado" : segment;
+    }
+
     private void openExternal(Uri uri) {
         String scheme = uri.getScheme();
         if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) return;
@@ -225,12 +471,26 @@ public final class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+        if (webView == null) {
+            finish();
+            return;
+        }
+        webView.evaluateJavascript(
+                "window.__BMS_ANDROID_BACK__ ? window.__BMS_ANDROID_BACK__() : 'exit'",
+                value -> {
+                    if ("\"handled\"".equals(value)) return;
+                    if (webView != null && webView.canGoBack()) webView.goBack();
+                    else finish();
+                }
+        );
     }
 
     @Override
     protected void onDestroy() {
+        if (filePathCallback != null) {
+            filePathCallback.onReceiveValue(null);
+            filePathCallback = null;
+        }
         if (webView != null) {
             webView.removeJavascriptInterface("AndroidBridge");
             webView.stopLoading();
