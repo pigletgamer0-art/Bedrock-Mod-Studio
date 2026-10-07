@@ -3,6 +3,7 @@ package com.bedrockmodstudio.app;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,6 +34,9 @@ public final class MainActivity extends Activity {
           if (window.__BMS_ANDROID_HOOK__) return;
           window.__BMS_ANDROID_HOOK__ = true;
           window.BMS_NATIVE_ANDROID = true;
+          document.documentElement.classList.add('android-native');
+          document.documentElement.dataset.bmsOrientation = 'portrait';
+
           try {
             if (navigator.serviceWorker && navigator.serviceWorker.register) {
               navigator.serviceWorker.register = () => Promise.reject(new Error('Service Worker desactivado dentro del APK nativo'));
@@ -89,6 +93,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(15, 17, 21));
