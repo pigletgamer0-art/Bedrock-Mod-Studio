@@ -200,7 +200,7 @@ public final class MainActivity extends Activity {
           const captureAutosave = () => {
             try {
               const save = document.getElementById('saveProjectBtn');
-              if (!save || window.__BMS_AUTOSAVE_CAPTURE__) return;
+              if (!save || window.__BMS_AUTOSAVE_CAPTURE__ || window.__BMS_LIBRARY_CAPTURE__) return;
               window.__BMS_AUTOSAVE_CAPTURE__ = true;
               save.click();
               setTimeout(() => { window.__BMS_AUTOSAVE_CAPTURE__ = false; }, 1800);
@@ -353,7 +353,7 @@ public final class MainActivity extends Activity {
               title.innerHTML = '<div><b>📁 Mis proyectos</b><small>Guardados dentro de la app</small></div><div class="android-project-library-actions"><span>' + projects.length + '</span><button type="button">Guardar actual</button></div>';
               const saveCurrent = title.querySelector('button');
               saveCurrent?.addEventListener('click', () => {
-                if (window.__BMS_LIBRARY_CAPTURE__) return;
+                if (window.__BMS_LIBRARY_CAPTURE__ || window.__BMS_AUTOSAVE_CAPTURE__) return;
                 window.__BMS_LIBRARY_CAPTURE__ = true;
                 window.__BMS_LIBRARY_PROJECT_NAME__ = document.getElementById('projectName')?.value || 'Proyecto';
                 document.getElementById('saveProjectBtn')?.click();
