@@ -310,7 +310,7 @@ public final class MainActivity extends Activity {
                 closeSheet();
                 if (tool === 'animation') {
                   document.querySelector('.tab[data-tab="designer"]')?.click();
-                  document.querySelector('.animation-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  document.querySelector('.model-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   return;
                 }
                 document.querySelector('[data-open-tool="' + tool + '"]')?.click();
