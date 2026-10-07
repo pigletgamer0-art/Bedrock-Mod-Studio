@@ -433,7 +433,7 @@ public final class MainActivity extends Activity {
                 open.type = 'button';
                 open.className = 'android-project-open';
                 const name = document.createElement('b');
-                name.textContent = project.name.replace(/\.bmsproject\.json$/i, '');
+                name.textContent = project.name.replace(/\\.bmsproject\\.json$/i, '');
                 const meta = document.createElement('small');
                 const kb = Math.max(1, Math.round(Number(project.size || 0) / 1024));
                 const date = new Date(Number(project.modified || 0));
