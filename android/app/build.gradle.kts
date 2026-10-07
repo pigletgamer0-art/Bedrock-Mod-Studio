@@ -10,8 +10,8 @@ android {
         applicationId = "com.bedrockmodstudio.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.1.2-alpha"
+        versionCode = 3
+        versionName = "0.1.3-alpha"
     }
 
     signingConfigs {

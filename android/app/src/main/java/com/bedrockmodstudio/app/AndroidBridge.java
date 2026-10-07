@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Locale;
 
 public final class AndroidBridge {
@@ -43,6 +44,10 @@ public final class AndroidBridge {
 
     private File autosaveTemp;
     private BufferedOutputStream autosaveOutput;
+
+    private File projectSnapshotTemp;
+    private BufferedOutputStream projectSnapshotOutput;
+    private String projectSnapshotName;
 
     private File projectTemp;
     private BufferedOutputStream projectOutput;
