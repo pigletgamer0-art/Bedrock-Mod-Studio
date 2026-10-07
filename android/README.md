@@ -2,7 +2,7 @@
 
 Primera envoltura nativa de Bedrock Mod Studio para Android.
 
-**Estado:** Android v0.1 Alpha — primera compilación automatizada en GitHub Actions.
+**Estado:** Android v0.1 Alpha — funciones nativas avanzadas implementadas; la compilación APK sigue bloqueada por el workflow CI antiguo antes de llegar a Gradle.
 
 ## Objetivos de esta etapa
 
@@ -65,3 +65,10 @@ La app añade una capa específica para teléfono:
 - El botón Atrás cierra primero el selector de proyecto, luego vuelve a Diseño y solo después sale de la app.
 - Android puede enviar directamente a Bedrock Mod Studio archivos `.png`, `.geo.json` y `.bmsproject.json` mediante **Abrir con** o **Compartir**.
 - La importación nativa directa tiene un límite de 8 MB para evitar bloquear el WebView; los selectores internos siguen disponibles para los flujos normales.
+
+
+## Estado hacia 100%
+
+Consulta `android/STATUS.md`. El proyecto no se marcará 100% hasta tener APK compilada e instalada y las pruebas reales de importación/exportación/Minecraft aprobadas.
+
+El workflow corregido está preparado en `android/CI_WORKFLOW_FIXED.yml`.
