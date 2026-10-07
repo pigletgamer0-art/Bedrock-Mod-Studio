@@ -2,6 +2,24 @@
 
 Editor offline-first para crear contenido de Minecraft Bedrock desde navegador/PWA. Puede trabajar como Add-On completo o como herramienta enfocada para una sola pieza, un Texture Pack, una textura PNG o un modelo con animaciones.
 
+## Android v0.1 Alpha
+
+La primera versión nativa para Android ya vive en `android/`.
+
+- WebView local con `WebViewAssetLoader`: no depende de una página remota.
+- Usa los mismos archivos de la versión web al compilar, evitando mantener dos editores diferentes.
+- Selector de archivos Android para importar PNG, `.geo.json` y proyectos.
+- Puente nativo para interceptar las exportaciones Blob.
+- En Android 10+ guarda en `Downloads/Bedrock Mod Studio`.
+- Los `.mcaddon`, `.mcpack` y `.mcworld` intentan abrirse directamente con Minecraft.
+- Blockbench y demás enlaces externos se abren fuera de la app.
+- El envío de archivos al puente se hace por fragmentos para soportar exportaciones grandes sin convertir todo el Add-On en una sola llamada JavaScript.
+- Workflow `.github/workflows/android.yml` preparado para construir un APK debug con Android Gradle Plugin 9.4.0 y Gradle 9.6.0.
+
+Consulta `android/README.md` y `android/TEST_PLAN.md`.
+
+> La compilación Android todavía necesita ejecutarse en un entorno con Android SDK. Este contenedor no incluye el SDK y los commits hechos mediante el conector no han iniciado automáticamente GitHub Actions, así que todavía no marcamos la APK como compilada o probada en dispositivo.
+
 ## Novedades v0.6 — Creator Lab
 
 La v0.6 añade tres generadores visuales que escriben archivos reales del Behavior Pack:
@@ -50,7 +68,7 @@ La v0.5 tenía un error en el generador de UUID: cuando `crypto.randomUUID()` es
 - Exportación `.mcpack`, `.mcaddon`, `.png`, `.geo.json` y proyecto `.bmsproject.json`.
 - PWA/offline con cache `bms-v0.6`.
 
-## Ejecutar
+## Ejecutar la web
 
 Sirve la carpeta mediante HTTP local, por ejemplo:
 
@@ -69,4 +87,4 @@ Luego abre `http://localhost:8080`.
 
 ## Estado
 
-v0.6 Alpha. Los nuevos generadores fueron probados con datos de ejemplo y sus JSON se analizaron correctamente. El arranque también se probó mediante un DOM simulado porque Chromium headless no termina de iniciar de forma fiable en este contenedor. Falta seguir ampliando filtros de spawn/biomas, funciones avanzadas de loot, tags de recetas, gizmos 3D directos, animation controllers visuales y herramientas de sonido/partículas.
+Web v0.6 Alpha + Android v0.1 Alpha en desarrollo. Después de estabilizar Android, la siguiente plataforma será Desktop con launcher propio de instalación, actualización y desinstalación.
