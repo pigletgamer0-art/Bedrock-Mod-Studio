@@ -369,7 +369,7 @@ public final class MainActivity extends Activity {
                 return;
               }
 
-              projects.slice(0, 12).forEach((project) => {
+              projects.forEach((project) => {
                 const row = document.createElement('div');
                 row.className = 'android-project-library-row';
 

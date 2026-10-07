@@ -361,7 +361,7 @@ public final class AndroidBridge {
     @JavascriptInterface
     public String getProjectSnapshotBase64(String fileName) {
         File file = safeProjectFile(fileName);
-        if (file == null || !file.isFile() || file.length() <= 0 || file.length() > 12L * 1024L * 1024L) return "";
+        if (file == null || !file.isFile() || file.length() <= 0 || file.length() > 16L * 1024L * 1024L) return "";
         try (InputStream input = new BufferedInputStream(new FileInputStream(file));
              java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
             byte[] buffer = new byte[32 * 1024];
