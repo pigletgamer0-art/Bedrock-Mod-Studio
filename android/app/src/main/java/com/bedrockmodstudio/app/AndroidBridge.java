@@ -272,7 +272,7 @@ public final class AndroidBridge {
     }
 
     private static String normalizeMime(String mime, String fileName) {
-        if (mime != null && !mime.isBlank() && !mime.equals("application/octet-stream")) return mime;
+        if (mime != null && !mime.trim().isEmpty() && !mime.equals("application/octet-stream")) return mime;
         String lower = fileName.toLowerCase(Locale.ROOT);
         if (lower.endsWith(".png")) return "image/png";
         if (lower.endsWith(".json")) return "application/json";
@@ -281,9 +281,9 @@ public final class AndroidBridge {
     }
 
     private static String sanitizeFileName(String fileName) {
-        String input = fileName == null || fileName.isBlank() ? "bedrock-mod-studio-export.bin" : fileName.trim();
+        String input = fileName == null || fileName.trim().isEmpty() ? "bedrock-mod-studio-export.bin" : fileName.trim();
         String safe = input.replaceAll("[\\/:*?\"<>|\\p{Cntrl}]", "_");
         if (safe.length() > 180) safe = safe.substring(safe.length() - 180);
-        return safe.isBlank() ? "bedrock-mod-studio-export.bin" : safe;
+        return safe.trim().isEmpty() ? "bedrock-mod-studio-export.bin" : safe;
     }
 }

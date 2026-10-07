@@ -357,7 +357,7 @@ public final class MainActivity extends Activity {
         pendingIncomingUri = uri;
         pendingIncomingName = queryDisplayName(uri);
         pendingIncomingMime = intent.getType();
-        if (pendingIncomingMime == null || pendingIncomingMime.isBlank()) {
+        if (pendingIncomingMime == null || pendingIncomingMime.trim().isEmpty()) {
             pendingIncomingMime = getContentResolver().getType(uri);
         }
         if (pendingIncomingMime == null) pendingIncomingMime = "application/octet-stream";
@@ -436,14 +436,14 @@ public final class MainActivity extends Activity {
                     int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                     if (index >= 0) {
                         String value = cursor.getString(index);
-                        if (value != null && !value.isBlank()) return value;
+                        if (value != null && !value.trim().isEmpty()) return value;
                     }
                 }
             } catch (Exception ignored) { }
         }
 
         String segment = uri.getLastPathSegment();
-        return segment == null || segment.isBlank() ? "archivo_importado" : segment;
+        return segment == null || segment.trim().isEmpty() ? "archivo_importado" : segment;
     }
 
     private void openExternal(Uri uri) {
