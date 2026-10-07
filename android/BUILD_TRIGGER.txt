@@ -1,2 +1,0 @@
-Android APK branch build trigger
-2026-10-07
