@@ -147,6 +147,12 @@ public final class MainActivity extends Activity {
           };
 
           window.__BMS_ANDROID_BACK__ = function() {
+            const createSheet = document.getElementById('androidCreateSheet');
+            if (createSheet && !createSheet.hidden) {
+              createSheet.hidden = true;
+              document.documentElement.classList.remove('android-create-sheet-open');
+              return 'handled';
+            }
             if (!document.documentElement.classList.contains('android-sidebar-collapsed')) {
               document.documentElement.classList.add('android-sidebar-collapsed');
               return 'handled';
@@ -196,6 +202,122 @@ public final class MainActivity extends Activity {
               input.dispatchEvent(new Event('change', { bubbles: true }));
               setTimeout(() => AndroidBridge.notifyError('Borrador recuperado automáticamente'), 250);
             } catch (_) {}
+          };
+
+          const setupCreationHome = () => {
+            const designer = document.getElementById('designer');
+            const contentList = document.getElementById('contentList');
+            if (!designer || !contentList || document.getElementById('androidCreationHome')) return;
+
+            const legacyCreatorCard = contentList.closest('.card');
+            const home = document.createElement('section');
+            home.id = 'androidCreationHome';
+            home.className = 'android-creation-home';
+            home.innerHTML = [
+              '<div class="android-home-head">',
+                '<div><span class="eyebrow">TU PROYECTO</span><h2>Lo que has creado</h2><small>Todo tu contenido en un solo lugar.</small></div>',
+                '<button id="androidCreatePlus" class="android-create-plus" type="button" aria-label="Crear">+</button>',
+              '</div>',
+              '<div id="androidHomeContent" class="android-home-content"></div>',
+              '<div id="androidSavedTextures" class="android-saved-textures" hidden></div>'
+            ].join('');
+
+            const hero = designer.querySelector('.hero');
+            if (hero && hero.nextSibling) designer.insertBefore(home, hero.nextSibling);
+            else designer.prepend(home);
+
+            document.getElementById('androidHomeContent').appendChild(contentList);
+            if (legacyCreatorCard) legacyCreatorCard.classList.add('android-legacy-create-card');
+
+            const sheet = document.createElement('div');
+            sheet.id = 'androidCreateSheet';
+            sheet.className = 'android-create-sheet-backdrop';
+            sheet.hidden = true;
+            sheet.innerHTML = [
+              '<section class="android-create-sheet" role="dialog" aria-modal="true" aria-label="Crear contenido">',
+                '<div class="android-sheet-grabber"></div>',
+                '<div class="android-sheet-head"><div><span class="eyebrow">CREAR</span><h2>¿Qué quieres crear?</h2></div><button id="androidCloseCreateSheet" type="button">×</button></div>',
+                '<div class="android-create-section"><h3>Contenido del juego</h3><div class="android-create-grid">',
+                  '<button data-proxy-create="item"><span>🗡️</span><b>Objeto</b><small>Ítems y herramientas</small></button>',
+                  '<button data-proxy-create="block"><span>🧱</span><b>Bloque</b><small>Bloques Bedrock</small></button>',
+                  '<button data-proxy-create="entity"><span>🐾</span><b>Entidad</b><small>Mob + modelo base</small></button>',
+                '</div></div>',
+                '<div class="android-create-section"><h3>Gameplay y lógica</h3><div class="android-create-grid">',
+                  '<button data-proxy-create="script"><span>⚙️</span><b>Script</b><small>Script API</small></button>',
+                  '<button data-proxy-create="recipe"><span>🧪</span><b>Receta</b><small>Crafting</small></button>',
+                  '<button data-proxy-create="loot"><span>🎁</span><b>Loot</b><small>Tablas de botín</small></button>',
+                  '<button data-proxy-create="spawn"><span>🌱</span><b>Spawn</b><small>Reglas de aparición</small></button>',
+                '</div></div>',
+                '<div class="android-create-section"><h3>Visual</h3><div class="android-create-grid">',
+                  '<button data-proxy-tool="pixel"><span>🎨</span><b>Textura</b><small>Pixel Studio</small></button>',
+                  '<button data-proxy-tool="model"><span>🧊</span><b>Modelo 3D</b><small>Geometría + UV</small></button>',
+                  '<button data-proxy-tool="animation"><span>🎞️</span><b>Animación</b><small>Timeline por huesos</small></button>',
+                '</div></div>',
+                '<div class="android-create-section"><h3>Proyecto</h3><button class="android-project-create" data-proxy-new-project="true"><span>＋</span><div><b>Nuevo proyecto</b><small>Add-On completo, una sola cosa, pack de texturas, textura o modelo.</small></div><strong>›</strong></button></div>',
+              '</section>'
+            ].join('');
+            document.body.appendChild(sheet);
+
+            const openSheet = () => {
+              sheet.hidden = false;
+              document.documentElement.classList.add('android-create-sheet-open');
+            };
+            const closeSheet = () => {
+              sheet.hidden = true;
+              document.documentElement.classList.remove('android-create-sheet-open');
+            };
+
+            document.getElementById('androidCreatePlus').addEventListener('click', openSheet);
+            document.getElementById('androidCloseCreateSheet').addEventListener('click', closeSheet);
+            sheet.addEventListener('pointerdown', (event) => { if (event.target === sheet) closeSheet(); });
+
+            sheet.querySelectorAll('[data-proxy-create]').forEach((button) => {
+              button.addEventListener('click', () => {
+                const original = document.querySelector('.create-card[data-create="' + button.dataset.proxyCreate + '"]');
+                closeSheet();
+                original?.click();
+              });
+            });
+
+            sheet.querySelectorAll('[data-proxy-tool]').forEach((button) => {
+              button.addEventListener('click', () => {
+                const tool = button.dataset.proxyTool;
+                closeSheet();
+                if (tool === 'animation') {
+                  document.querySelector('.tab[data-tab="designer"]')?.click();
+                  document.querySelector('.animation-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  return;
+                }
+                document.querySelector('[data-open-tool="' + tool + '"]')?.click();
+              });
+            });
+
+            sheet.querySelector('[data-proxy-new-project]')?.addEventListener('click', () => {
+              closeSheet();
+              document.getElementById('newProjectBtn')?.click();
+            });
+
+            const textureList = document.getElementById('androidSavedTextures');
+            const fileTree = document.getElementById('fileTree');
+            const refreshTextureList = () => {
+              if (!textureList || !fileTree) return;
+              const pngs = [...fileTree.querySelectorAll('[data-path]')]
+                .map((row) => row.dataset.path)
+                .filter((path) => /\.png$/i.test(path || ''));
+              if (!pngs.length) {
+                textureList.hidden = true;
+                textureList.innerHTML = '';
+                return;
+              }
+              textureList.hidden = false;
+              textureList.innerHTML = '<div class="android-texture-title"><b>🎨 Texturas guardadas</b><small>' + pngs.length + '</small></div>' +
+                pngs.map((path) => '<button type="button" data-texture-path="' + path.replace(/"/g, '&quot;') + '"><span>▦</span><div><b>' + path.split('/').pop() + '</b><small>' + path + '</small></div></button>').join('');
+              textureList.querySelectorAll('[data-texture-path]').forEach((button) => {
+                button.addEventListener('click', () => document.querySelector('.tab[data-tab="pixel"]')?.click());
+              });
+            };
+            if (fileTree) new MutationObserver(refreshTextureList).observe(fileTree, { childList: true, subtree: true });
+            refreshTextureList();
           };
 
           const setupAndroidUi = () => {
@@ -248,6 +370,7 @@ public final class MainActivity extends Activity {
             document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', syncDock));
             syncDock();
 
+            setupCreationHome();
             setTimeout(restoreAutosave, 500);
             setInterval(captureAutosave, 45000);
             document.addEventListener('visibilitychange', () => {

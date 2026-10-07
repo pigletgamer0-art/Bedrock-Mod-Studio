@@ -127,3 +127,16 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Un recurso HTTP/HTTPS incrustado desde el editor debe quedar bloqueado dentro del WebView.
 - Los botones que abren Blockbench o una web externa deben seguir enviando la URL al navegador mediante ACTION_VIEW.
 - Confirmar que ninguna página web externa se carga dentro del WebView que tiene acceso a AndroidBridge.
+
+
+## Inicio de creaciones y botón +
+
+- En Diseño, comprobar que aparece primero la tarjeta “Lo que has creado”.
+- El botón + debe abrir una hoja inferior ordenada por Contenido del juego, Gameplay y lógica, Visual y Proyecto.
+- Crear objeto, bloque y entidad desde la hoja y confirmar que aparecen inmediatamente en “Lo que has creado”.
+- Crear receta, loot y spawn desde la hoja y confirmar que abren Creator Lab y luego aparecen en la lista al guardar.
+- Abrir Textura, Modelo 3D y Animación desde la hoja y confirmar que navegan a la herramienta correcta.
+- Guardar una textura PNG y confirmar que aparece bajo “Texturas guardadas”.
+- Pulsar “Nuevo proyecto” desde la hoja y confirmar que abre el selector de tipo de proyecto existente.
+- Pulsar Atrás con la hoja + abierta: debe cerrarla antes de cualquier otra navegación.
+- El antiguo bloque duplicado de “Crear elemento” no debe mostrarse en Android.
