@@ -10,48 +10,55 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
    - Abrir Bedrock Mod Studio.
    - Deben cargar interfaz, bundle, CSS, Pixel Studio y modelador sin red.
 
-2. **Creación de proyecto**
-   - Probar Add-On completo, una sola cosa, Texture Pack, textura suelta y modelo + animación.
-   - Reiniciar la Activity/rotar pantalla y confirmar que WebView restaura el estado visible.
+2. **Portrait / interfaz vertical**
+   - En un teléfono, abrir la app en vertical.
+   - Girar físicamente el teléfono: la Activity debe permanecer en portrait.
+   - Verificar que navegación, exportación, Pixel Studio, modelador, UV, timeline, Creator Lab y editor de código sean utilizables sin desplazamiento horizontal global.
+   - Confirmar que el selector “Nuevo proyecto” aparece como panel vertical desde la parte inferior.
+   - En Android 16 probar también una pantalla de 600dp o más: se declara compatibilidad temporal para conservar las restricciones actuales, pero la interfaz también debe seguir siendo adaptable.
 
-13. **Importar PNG**
+3. **Creación de proyecto**
+   - Probar Add-On completo, una sola cosa, Texture Pack, textura suelta y modelo + animación.
+   - Reiniciar la Activity y confirmar que WebView restaura el estado visible.
+
+4. **Importar PNG**
    - Pixel Studio → Importar PNG.
    - Debe abrir el selector de documentos Android.
    - Elegir 16×16, 64×64 y una imagen de tamaño no estándar.
 
-13. **Importar geometry JSON**
+5. **Importar geometry JSON**
    - Modelador → Importar .geo.json.
    - Elegir un modelo Bedrock válido desde almacenamiento.
 
-13. **Guardar y abrir proyecto**
+6. **Guardar y abrir proyecto**
    - Guardar .bmsproject.json.
    - Confirmar que el archivo se escribe sin corrupción.
    - Volver a importarlo desde el selector Android.
 
-13. **Exportar PNG**
+7. **Exportar PNG**
    - Exportar una textura.
    - Android 10+: comprobar `Downloads/Bedrock Mod Studio`.
    - Validar que el PNG abre en una app de galería.
 
-13. **Exportar .mcaddon**
+8. **Exportar .mcaddon**
    - Crear un Add-On con BP + RP.
    - Exportar.
    - Debe guardarse y lanzar Minecraft automáticamente cuando `com.mojang.minecraftpe` esté instalado.
    - Minecraft debe iniciar el proceso de importación.
 
-13. **Exportar .mcpack**
+9. **Exportar .mcpack**
    - Probar Behavior Pack y Resource Pack por separado.
    - Confirmar apertura con Minecraft.
 
-13. **Archivo grande**
-   - Crear/importar varias texturas para producir un paquete de varios MB.
-   - Exportarlo y verificar que el puente por fragmentos no se queda sin memoria ni trunca bytes.
+10. **Archivo grande**
+    - Crear/importar varias texturas para producir un paquete de varios MB.
+    - Exportarlo y verificar que el puente por fragmentos no se queda sin memoria ni trunca bytes.
 
-13. **Blockbench**
+11. **Blockbench**
     - Pulsar “Blockbench ↗”.
     - Debe abrir navegador/Blockbench fuera del WebView y no reemplazar el editor.
 
-13. **Seguridad de navegación**
+12. **Seguridad de navegación**
     - La app debe mantener el editor en `appassets.androidplatform.net`.
     - Navegaciones HTTP/HTTPS externas se abren con Android ACTION_VIEW.
 
@@ -59,10 +66,13 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
     - Mínimo objetivo: Android 7.0 / API 24.
     - Probar especialmente Android 10+ por MediaStore.
     - Probar Android 16 / API 36.
+    - En dispositivos grandes Android 16 puede aplicar reglas adaptativas propias; la UI no debe romperse aunque el sistema permita otra orientación.
 
 ## Estado actual
 
 - XML Android: parseado correctamente.
-- Código Java: pasa etapa de parsing; en este contenedor falla después por ausencia de clases del Android SDK, que no está instalado.
+- Portrait: declarado en manifest y reforzado en `MainActivity`.
+- UI Android: tiene reglas específicas `.android-native` para portrait.
+- Código Java: pendiente de compilación completa en un entorno con Android SDK.
 - Gradle/Android SDK: pendiente de compilación real.
 - GitHub Actions: workflow de build creado; los commits realizados mediante el conector no iniciaron un run automáticamente, por lo que aún no se considera una prueba de compilación.
