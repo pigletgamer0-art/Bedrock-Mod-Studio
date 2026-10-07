@@ -35,10 +35,16 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
           script: |
             set -eu
+            adb wait-for-device
+            for i in $(seq 1 30); do
+              BOOT=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+              [ "$BOOT" = "1" ] && break
+              sleep 2
+            done
+            test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1"
             APK=$(find artifact -name '*.apk' -type f | head -n 1)
             test -n "$APK"
             adb install -r "$APK"
