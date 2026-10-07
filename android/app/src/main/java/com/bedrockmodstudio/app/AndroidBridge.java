@@ -16,6 +16,9 @@ import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -40,6 +43,10 @@ public final class AndroidBridge {
 
     private File autosaveTemp;
     private BufferedOutputStream autosaveOutput;
+
+    private File projectTemp;
+    private BufferedOutputStream projectOutput;
+    private String projectSnapshotName;
 
     AndroidBridge(Activity activity) {
         this.activity = activity;
@@ -260,6 +267,117 @@ public final class AndroidBridge {
         }
     }
 
+    @JavascriptInterface
+    public void beginProjectSnapshot(String fileName) {
+        synchronized (lock) {
+            clearProjectPendingLocked();
+            try {
+                File folder = projectLibraryFolder();
+                String safe = sanitizeFileName(fileName);
+                if (!safe.toLowerCase(Locale.ROOT).endsWith(".bmsproject.json")) {
+                    safe += ".bmsproject.json";
+                }
+                projectSnapshotName = safe;
+                projectTemp = File.createTempFile("project_", ".tmp", folder);
+                projectOutput = new BufferedOutputStream(new FileOutputStream(projectTemp, false));
+            } catch (Exception error) {
+                clearProjectPendingLocked();
+                showToast("No pude preparar la copia interna del proyecto: " + error.getMessage());
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public void appendProjectSnapshotChunk(String base64Chunk) {
+        synchronized (lock) {
+            if (projectOutput == null) return;
+            try {
+                projectOutput.write(Base64.decode(base64Chunk, Base64.NO_WRAP));
+            } catch (Exception error) {
+                clearProjectPendingLocked();
+                showToast("Falló la copia interna del proyecto: " + error.getMessage());
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public void finishProjectSnapshot() {
+        synchronized (lock) {
+            if (projectOutput == null || projectTemp == null || projectSnapshotName == null) return;
+            try {
+                projectOutput.flush();
+                projectOutput.close();
+                projectOutput = null;
+
+                File target = new File(projectLibraryFolder(), projectSnapshotName);
+                if (target.exists() && !target.delete()) {
+                    throw new IOException("No se pudo reemplazar el proyecto anterior");
+                }
+                if (!projectTemp.renameTo(target)) {
+                    try (InputStream input = new BufferedInputStream(new FileInputStream(projectTemp));
+                         OutputStream output = new BufferedOutputStream(new FileOutputStream(target))) {
+                        copy(input, output);
+                    }
+                    if (!projectTemp.delete()) projectTemp.deleteOnExit();
+                }
+                target.setLastModified(System.currentTimeMillis());
+                projectTemp = null;
+                projectSnapshotName = null;
+            } catch (Exception error) {
+                clearProjectPendingLocked();
+                showToast("No pude guardar la copia interna: " + error.getMessage());
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public void cancelProjectSnapshot() {
+        synchronized (lock) {
+            clearProjectPendingLocked();
+        }
+    }
+
+    @JavascriptInterface
+    public String listProjectSnapshotsJson() {
+        JSONArray result = new JSONArray();
+        File[] files = projectLibraryFolder().listFiles((dir, name) ->
+                name.toLowerCase(Locale.ROOT).endsWith(".bmsproject.json"));
+        if (files == null) return result.toString();
+
+        java.util.Arrays.sort(files, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
+        for (File file : files) {
+            try {
+                JSONObject row = new JSONObject();
+                row.put("name", file.getName());
+                row.put("size", file.length());
+                row.put("modified", file.lastModified());
+                result.put(row);
+            } catch (Exception ignored) { }
+        }
+        return result.toString();
+    }
+
+    @JavascriptInterface
+    public String getProjectSnapshotBase64(String fileName) {
+        File file = safeProjectFile(fileName);
+        if (file == null || !file.isFile() || file.length() <= 0 || file.length() > 12L * 1024L * 1024L) return "";
+        try (InputStream input = new BufferedInputStream(new FileInputStream(file));
+             java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+            byte[] buffer = new byte[32 * 1024];
+            int read;
+            while ((read = input.read(buffer)) != -1) output.write(buffer, 0, read);
+            return Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP);
+        } catch (Exception error) {
+            return "";
+        }
+    }
+
+    @JavascriptInterface
+    public boolean deleteProjectSnapshot(String fileName) {
+        File file = safeProjectFile(fileName);
+        return file != null && file.isFile() && file.delete();
+    }
+
     private Uri persistExport(File source, String fileName, String mime) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ContentResolver resolver = activity.getContentResolver();
@@ -336,6 +454,37 @@ public final class AndroidBridge {
         } catch (ActivityNotFoundException ignored) {
             return false;
         }
+    }
+
+    private File projectLibraryFolder() {
+        File folder = new File(activity.getFilesDir(), "projects");
+        if (!folder.exists()) folder.mkdirs();
+        return folder;
+    }
+
+    private File safeProjectFile(String fileName) {
+        String safe = sanitizeFileName(fileName);
+        File folder = projectLibraryFolder();
+        File candidate = new File(folder, safe);
+        try {
+            String root = folder.getCanonicalPath() + File.separator;
+            String path = candidate.getCanonicalPath();
+            return path.startsWith(root) ? candidate : null;
+        } catch (IOException error) {
+            return null;
+        }
+    }
+
+    private void clearProjectPendingLocked() {
+        if (projectOutput != null) {
+            try { projectOutput.close(); } catch (IOException ignored) { }
+        }
+        if (projectTemp != null && projectTemp.exists() && !projectTemp.delete()) {
+            projectTemp.deleteOnExit();
+        }
+        projectOutput = null;
+        projectTemp = null;
+        projectSnapshotName = null;
     }
 
     private void clearAutosavePendingLocked() {

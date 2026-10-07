@@ -91,13 +91,22 @@ public final class MainActivity extends Activity {
               }
 
               const openAfter = /\\.(mcaddon|mcpack|mcworld)$/i.test(filename || '');
+              const projectSnapshot = /\\.bmsproject\\.json$/i.test(filename || '');
               AndroidBridge.beginFile(filename || 'bedrock-mod-studio-export.bin', blob.type || 'application/octet-stream', openAfter);
+              if (projectSnapshot) AndroidBridge.beginProjectSnapshot(filename);
               for (let offset = 0; offset < bytes.length; offset += chunkBytes) {
-                AndroidBridge.appendFileChunk(toBase64(bytes.subarray(offset, Math.min(bytes.length, offset + chunkBytes))));
+                const encoded = toBase64(bytes.subarray(offset, Math.min(bytes.length, offset + chunkBytes)));
+                AndroidBridge.appendFileChunk(encoded);
+                if (projectSnapshot) AndroidBridge.appendProjectSnapshotChunk(encoded);
               }
               AndroidBridge.finishFile();
+              if (projectSnapshot) {
+                AndroidBridge.finishProjectSnapshot();
+                window.dispatchEvent(new Event('bms-project-library-changed'));
+              }
             } catch (error) {
               try { AndroidBridge.cancelFile(); } catch (_) {}
+              try { AndroidBridge.cancelProjectSnapshot(); } catch (_) {}
               try { AndroidBridge.notifyError(error && error.message ? error.message : String(error)); } catch (_) {}
             }
           };
@@ -219,6 +228,7 @@ public final class MainActivity extends Activity {
                 '<button id="androidCreatePlus" class="android-create-plus" type="button" aria-label="Crear">+</button>',
               '</div>',
               '<div class="android-home-tools"><label class="android-home-search"><span>⌕</span><input id="androidCreationSearch" type="search" placeholder="Buscar en lo que has creado..." autocomplete="off"></label><span id="androidCreationCount" class="android-creation-count">0</span></div>',
+              '<div id="androidProjectLibrary" class="android-project-library"></div>',
               '<div id="androidHomeContent" class="android-home-content"></div>',
               '<div id="androidNoCreationResults" class="android-no-results" hidden>No encontré coincidencias.</div>',
               '<div id="androidSavedTextures" class="android-saved-textures" hidden></div>'
@@ -317,6 +327,69 @@ public final class MainActivity extends Activity {
             searchInput?.addEventListener('input', refreshCreationList);
             new MutationObserver(refreshCreationList).observe(contentList, { childList: true, subtree: true, characterData: true });
             refreshCreationList();
+
+            const projectLibrary = document.getElementById('androidProjectLibrary');
+            const refreshProjectLibrary = () => {
+              if (!projectLibrary) return;
+              let projects = [];
+              try { projects = JSON.parse(AndroidBridge.listProjectSnapshotsJson() || '[]'); } catch (_) {}
+              projectLibrary.replaceChildren();
+
+              const title = document.createElement('div');
+              title.className = 'android-project-library-title';
+              title.innerHTML = '<div><b>📁 Mis proyectos</b><small>Copias guardadas dentro de la app</small></div><span>' + projects.length + '</span>';
+              projectLibrary.appendChild(title);
+
+              if (!projects.length) {
+                const empty = document.createElement('div');
+                empty.className = 'android-project-library-empty';
+                empty.textContent = 'Guarda un proyecto y aparecerá aquí.';
+                projectLibrary.appendChild(empty);
+                return;
+              }
+
+              projects.slice(0, 12).forEach((project) => {
+                const row = document.createElement('div');
+                row.className = 'android-project-library-row';
+
+                const open = document.createElement('button');
+                open.type = 'button';
+                open.className = 'android-project-open';
+                const name = document.createElement('b');
+                name.textContent = project.name.replace(/\.bmsproject\.json$/i, '');
+                const meta = document.createElement('small');
+                const kb = Math.max(1, Math.round(Number(project.size || 0) / 1024));
+                const date = new Date(Number(project.modified || 0));
+                meta.textContent = kb + ' KB · ' + (Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString());
+                open.append(name, meta);
+                open.addEventListener('click', () => {
+                  const base64 = AndroidBridge.getProjectSnapshotBase64(project.name);
+                  if (!base64) return AndroidBridge.notifyError('No pude abrir la copia interna');
+                  const bytes = fromBase64(base64);
+                  const file = new File([bytes], project.name, { type: 'application/json' });
+                  const transfer = new DataTransfer();
+                  transfer.items.add(file);
+                  const input = document.getElementById('loadProjectInput');
+                  if (!input) return;
+                  input.files = transfer.files;
+                  input.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'android-project-remove';
+                remove.textContent = '×';
+                remove.setAttribute('aria-label', 'Eliminar copia');
+                remove.addEventListener('click', () => {
+                  if (AndroidBridge.deleteProjectSnapshot(project.name)) refreshProjectLibrary();
+                });
+
+                row.append(open, remove);
+                projectLibrary.appendChild(row);
+              });
+            };
+            window.addEventListener('bms-project-library-changed', refreshProjectLibrary);
+            refreshProjectLibrary();
 
             const textureList = document.getElementById('androidSavedTextures');
             const fileTree = document.getElementById('fileTree');

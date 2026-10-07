@@ -150,3 +150,14 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - El contador debe cambiar a visible/total durante una búsqueda.
 - Una búsqueda sin coincidencias debe mostrar “No encontré coincidencias”.
 - Borrar el texto debe restaurar toda la lista sin perder ni reordenar contenido.
+
+
+## Biblioteca local de proyectos
+
+- Guardar manualmente un .bmsproject.json: debe seguir exportándose a Descargas y aparecer también en “Mis proyectos”.
+- Guardar el mismo nombre otra vez: debe reemplazar la copia interna, no duplicarla.
+- Cerrar y abrir la app: la biblioteca debe conservarse.
+- Tocar un proyecto: debe cargarlo usando el mismo importador de proyectos.
+- Borrar una copia interna: debe desaparecer de “Mis proyectos” sin borrar el archivo exportado en Descargas.
+- El listado debe ordenar los proyectos por fecha de modificación más reciente.
+- Un proyecto interno mayor a 12 MB no debe cargarse directamente al WebView.
