@@ -33,6 +33,7 @@ import androidx.webkit.WebViewFeature;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -348,7 +349,19 @@ public final class MainActivity extends Activity {
             @Nullable
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return assetLoader.shouldInterceptRequest(request.getUrl());
+                Uri uri = request.getUrl();
+                String origin = uri.getScheme() + "://" + uri.getHost();
+                if (APP_ORIGIN.equals(origin)) {
+                    return assetLoader.shouldInterceptRequest(uri);
+                }
+                if ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) {
+                    return new WebResourceResponse(
+                            "text/plain",
+                            "UTF-8",
+                            new ByteArrayInputStream(new byte[0])
+                    );
+                }
+                return null;
             }
 
             @Override

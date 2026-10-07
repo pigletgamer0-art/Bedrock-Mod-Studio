@@ -119,3 +119,11 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Pulsar “☰ Proyecto”: debe abrirse como panel flotante sin cambiar a horizontal.
 - Pulsar Atrás con el panel abierto: debe cerrarlo antes de cambiar de pestaña o salir.
 - En pantallas angostas el botón puede reducirse al icono ☰ y no debe cubrir las pestañas.
+
+
+## Aislamiento offline del WebView
+
+- Con modo avión, toda la interfaz debe cargar normalmente desde appassets.
+- Un recurso HTTP/HTTPS incrustado desde el editor debe quedar bloqueado dentro del WebView.
+- Los botones que abren Blockbench o una web externa deben seguir enviando la URL al navegador mediante ACTION_VIEW.
+- Confirmar que ninguna página web externa se carga dentro del WebView que tiene acceso a AndroidBridge.
