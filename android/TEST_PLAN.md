@@ -86,3 +86,11 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Desde Archivos/Galería, usar **Abrir con** o **Compartir** con un PNG y comprobar que llega a Pixel Studio.
 - Repetir con un `.geo.json` y un `.bmsproject.json`.
 - Intentar enviar un archivo no compatible y confirmar que la app avisa sin fallar.
+
+
+## Edge-to-edge / barras del sistema
+
+- Android 15 y 16: confirmar que la barra de estado, cámara/notch y barra de navegación no cubren botones ni el dock.
+- Probar navegación por gestos y navegación de 3 botones.
+- Abrir el teclado en Código y confirmar que los insets del sistema no producen doble margen inferior.
+- Probar un dispositivo con recorte/cutout si está disponible.
