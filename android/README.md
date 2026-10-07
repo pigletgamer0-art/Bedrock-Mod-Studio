@@ -2,6 +2,8 @@
 
 Primera envoltura nativa de Bedrock Mod Studio para Android.
 
+**Estado:** Android v0.1 Alpha — primera compilación automatizada en GitHub Actions.
+
 ## Objetivos de esta etapa
 
 - Ejecutar la aplicación web localmente, sin depender de una web remota.
