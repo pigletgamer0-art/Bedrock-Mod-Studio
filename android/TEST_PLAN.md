@@ -94,3 +94,12 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Probar navegación por gestos y navegación de 3 botones.
 - Abrir el teclado en Código y confirmar que los insets del sistema no producen doble margen inferior.
 - Probar un dispositivo con recorte/cutout si está disponible.
+
+
+## Autosave nativo
+
+- Crear/modificar un proyecto y esperar al menos 45 segundos.
+- Cerrar la app desde recientes y volver a abrirla: debe recuperar el último borrador interno.
+- Mandar la app al fondo y volver: no debe aparecer una descarga visible por cada autosave.
+- Confirmar que Guardar proyecto manual sigue exportando el archivo normalmente.
+- Probar un proyecto cercano a 8 MB: si supera el límite de recuperación directa, la app no debe bloquearse.

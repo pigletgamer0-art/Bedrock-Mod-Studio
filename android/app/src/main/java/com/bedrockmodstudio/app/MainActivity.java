@@ -77,9 +77,20 @@ public final class MainActivity extends Activity {
               const response = await fetch(href);
               const blob = await response.blob();
               const bytes = new Uint8Array(await blob.arrayBuffer());
-              const openAfter = /\\.(mcaddon|mcpack|mcworld)$/i.test(filename || '');
-              AndroidBridge.beginFile(filename || 'bedrock-mod-studio-export.bin', blob.type || 'application/octet-stream', openAfter);
               const chunkBytes = 192 * 1024;
+
+              if (window.__BMS_AUTOSAVE_CAPTURE__ && /\.bmsproject\.json$/i.test(filename || '')) {
+                AndroidBridge.beginAutosave();
+                for (let offset = 0; offset < bytes.length; offset += chunkBytes) {
+                  AndroidBridge.appendAutosaveChunk(toBase64(bytes.subarray(offset, Math.min(bytes.length, offset + chunkBytes))));
+                }
+                AndroidBridge.finishAutosave();
+                window.__BMS_AUTOSAVE_CAPTURE__ = false;
+                return;
+              }
+
+              const openAfter = /\.(mcaddon|mcpack|mcworld)$/i.test(filename || '');
+              AndroidBridge.beginFile(filename || 'bedrock-mod-studio-export.bin', blob.type || 'application/octet-stream', openAfter);
               for (let offset = 0; offset < bytes.length; offset += chunkBytes) {
                 AndroidBridge.appendFileChunk(toBase64(bytes.subarray(offset, Math.min(bytes.length, offset + chunkBytes))));
               }
@@ -152,6 +163,35 @@ public final class MainActivity extends Activity {
             return 'exit';
           };
 
+          const captureAutosave = () => {
+            try {
+              const save = document.getElementById('saveProjectBtn');
+              if (!save || window.__BMS_AUTOSAVE_CAPTURE__) return;
+              window.__BMS_AUTOSAVE_CAPTURE__ = true;
+              save.click();
+              setTimeout(() => { window.__BMS_AUTOSAVE_CAPTURE__ = false; }, 1800);
+            } catch (_) {
+              window.__BMS_AUTOSAVE_CAPTURE__ = false;
+            }
+          };
+
+          const restoreAutosave = () => {
+            try {
+              if (!AndroidBridge.hasAutosave()) return;
+              const base64 = AndroidBridge.getAutosaveBase64();
+              if (!base64) return;
+              const input = document.getElementById('loadProjectInput');
+              if (!input) return;
+              const bytes = fromBase64(base64);
+              const file = new File([bytes], 'recuperado.bmsproject.json', { type: 'application/json' });
+              const transfer = new DataTransfer();
+              transfer.items.add(file);
+              input.files = transfer.files;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+              setTimeout(() => AndroidBridge.notifyError('Borrador recuperado automáticamente'), 250);
+            } catch (_) {}
+          };
+
           const setupAndroidUi = () => {
             if (!document.body || document.getElementById('androidDock')) return;
 
@@ -189,6 +229,15 @@ public final class MainActivity extends Activity {
 
             document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', syncDock));
             syncDock();
+
+            setTimeout(restoreAutosave, 500);
+            setInterval(captureAutosave, 45000);
+            document.addEventListener('visibilitychange', () => {
+              if (document.visibilityState === 'hidden') captureAutosave();
+            });
+            document.getElementById('loadProjectInput')?.addEventListener('change', () => {
+              setTimeout(captureAutosave, 2500);
+            });
 
             const viewport = window.visualViewport;
             if (viewport) {

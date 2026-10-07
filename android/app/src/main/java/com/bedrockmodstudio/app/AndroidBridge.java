@@ -38,6 +38,9 @@ public final class AndroidBridge {
     private String pendingMime;
     private boolean pendingOpenAfter;
 
+    private File autosaveTemp;
+    private BufferedOutputStream autosaveOutput;
+
     AndroidBridge(Activity activity) {
         this.activity = activity;
     }
@@ -162,6 +165,91 @@ public final class AndroidBridge {
         showToast("Bedrock Mod Studio: " + message);
     }
 
+    @JavascriptInterface
+    public void beginAutosave() {
+        synchronized (lock) {
+            clearAutosavePendingLocked();
+            try {
+                autosaveTemp = new File(activity.getFilesDir(), "autosave.tmp");
+                autosaveOutput = new BufferedOutputStream(new FileOutputStream(autosaveTemp, false));
+            } catch (Exception error) {
+                clearAutosavePendingLocked();
+                showToast("No pude iniciar el autosave: " + error.getMessage());
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public void appendAutosaveChunk(String base64Chunk) {
+        synchronized (lock) {
+            if (autosaveOutput == null) return;
+            try {
+                autosaveOutput.write(Base64.decode(base64Chunk, Base64.NO_WRAP));
+            } catch (Exception error) {
+                clearAutosavePendingLocked();
+                showToast("Falló el autosave: " + error.getMessage());
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public void finishAutosave() {
+        synchronized (lock) {
+            if (autosaveOutput == null || autosaveTemp == null) return;
+            try {
+                autosaveOutput.flush();
+                autosaveOutput.close();
+                autosaveOutput = null;
+
+                File target = new File(activity.getFilesDir(), "autosave.bmsproject.json");
+                if (target.exists() && !target.delete()) {
+                    throw new IOException("No se pudo reemplazar el borrador anterior");
+                }
+                if (!autosaveTemp.renameTo(target)) {
+                    try (InputStream input = new BufferedInputStream(new FileInputStream(autosaveTemp));
+                         OutputStream output = new BufferedOutputStream(new FileOutputStream(target))) {
+                        copy(input, output);
+                    }
+                    if (!autosaveTemp.delete()) autosaveTemp.deleteOnExit();
+                }
+                autosaveTemp = null;
+            } catch (Exception error) {
+                clearAutosavePendingLocked();
+                showToast("No pude guardar el autosave: " + error.getMessage());
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public boolean hasAutosave() {
+        File file = new File(activity.getFilesDir(), "autosave.bmsproject.json");
+        return file.isFile() && file.length() > 0;
+    }
+
+    @JavascriptInterface
+    public String getAutosaveBase64() {
+        File file = new File(activity.getFilesDir(), "autosave.bmsproject.json");
+        if (!file.isFile() || file.length() <= 0 || file.length() > 8L * 1024L * 1024L) return "";
+        try (InputStream input = new BufferedInputStream(new FileInputStream(file));
+             java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+            byte[] buffer = new byte[32 * 1024];
+            int read;
+            while ((read = input.read(buffer)) != -1) output.write(buffer, 0, read);
+            return Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP);
+        } catch (Exception error) {
+            return "";
+        }
+    }
+
+    @JavascriptInterface
+    public void clearAutosave() {
+        synchronized (lock) {
+            clearAutosavePendingLocked();
+            File file = new File(activity.getFilesDir(), "autosave.bmsproject.json");
+            if (file.exists() && !file.delete()) file.deleteOnExit();
+        }
+    }
+
     private Uri persistExport(File source, String fileName, String mime) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ContentResolver resolver = activity.getContentResolver();
@@ -225,6 +313,17 @@ public final class AndroidBridge {
                 Toast.makeText(activity, "Archivo guardado, pero no encontré una app para abrirlo.", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void clearAutosavePendingLocked() {
+        if (autosaveOutput != null) {
+            try { autosaveOutput.close(); } catch (IOException ignored) { }
+        }
+        if (autosaveTemp != null && autosaveTemp.exists() && !autosaveTemp.delete()) {
+            autosaveTemp.deleteOnExit();
+        }
+        autosaveOutput = null;
+        autosaveTemp = null;
     }
 
     private void clearPendingLocked() {
