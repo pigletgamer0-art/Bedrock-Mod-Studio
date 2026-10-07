@@ -1,0 +1,54 @@
+name: Android APK Build Branch
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [android-apk-build]
+    paths:
+      - 'android/**'
+      - 'index.html'
+      - 'styles.css'
+      - 'app.js'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'bundle/**'
+      - '.github/workflows/android-build.yml'
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
+      - name: Install Android SDK packages
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Build debug APK
+        run: gradle -p android assembleDebug --stacktrace --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bedrock-Mod-Studio-Android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
