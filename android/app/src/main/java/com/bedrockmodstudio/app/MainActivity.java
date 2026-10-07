@@ -218,7 +218,9 @@ public final class MainActivity extends Activity {
                 '<div><span class="eyebrow">TU PROYECTO</span><h2>Lo que has creado</h2><small>Todo tu contenido en un solo lugar.</small></div>',
                 '<button id="androidCreatePlus" class="android-create-plus" type="button" aria-label="Crear">+</button>',
               '</div>',
+              '<div class="android-home-tools"><label class="android-home-search"><span>⌕</span><input id="androidCreationSearch" type="search" placeholder="Buscar en lo que has creado..." autocomplete="off"></label><span id="androidCreationCount" class="android-creation-count">0</span></div>',
               '<div id="androidHomeContent" class="android-home-content"></div>',
+              '<div id="androidNoCreationResults" class="android-no-results" hidden>No encontré coincidencias.</div>',
               '<div id="androidSavedTextures" class="android-saved-textures" hidden></div>'
             ].join('');
 
@@ -296,6 +298,25 @@ public final class MainActivity extends Activity {
               closeSheet();
               document.getElementById('newProjectBtn')?.click();
             });
+
+            const searchInput = document.getElementById('androidCreationSearch');
+            const creationCount = document.getElementById('androidCreationCount');
+            const noResults = document.getElementById('androidNoCreationResults');
+            const refreshCreationList = () => {
+              const rows = [...contentList.querySelectorAll('.content-row')];
+              const query = (searchInput?.value || '').trim().toLocaleLowerCase();
+              let visible = 0;
+              rows.forEach((row) => {
+                const show = !query || row.textContent.toLocaleLowerCase().includes(query);
+                row.hidden = !show;
+                if (show) visible++;
+              });
+              if (creationCount) creationCount.textContent = query ? visible + '/' + rows.length : String(rows.length);
+              if (noResults) noResults.hidden = !query || visible > 0;
+            };
+            searchInput?.addEventListener('input', refreshCreationList);
+            new MutationObserver(refreshCreationList).observe(contentList, { childList: true, subtree: true, characterData: true });
+            refreshCreationList();
 
             const textureList = document.getElementById('androidSavedTextures');
             const fileTree = document.getElementById('fileTree');

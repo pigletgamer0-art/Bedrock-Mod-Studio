@@ -140,3 +140,13 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Pulsar “Nuevo proyecto” desde la hoja y confirmar que abre el selector de tipo de proyecto existente.
 - Pulsar Atrás con la hoja + abierta: debe cerrarla antes de cualquier otra navegación.
 - El antiguo bloque duplicado de “Crear elemento” no debe mostrarse en Android.
+
+
+## Buscador de creaciones
+
+- Crear al menos tres tipos distintos de contenido.
+- El contador junto al buscador debe reflejar el total.
+- Buscar por nombre o texto visible y confirmar que solo quedan coincidencias.
+- El contador debe cambiar a visible/total durante una búsqueda.
+- Una búsqueda sin coincidencias debe mostrar “No encontré coincidencias”.
+- Borrar el texto debe restaurar toda la lista sin perder ni reordenar contenido.

@@ -199,3 +199,10 @@ html.android-native body{min-height:100dvh;overscroll-behavior-y:contain}
 @media(max-width:360px){
   .android-create-grid{grid-template-columns:1fr}
 }
+
+.android-home-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;margin-bottom:10px}
+.android-home-search{display:flex;align-items:center;gap:7px;min-height:42px;padding:0 10px;border:1px solid #303945;border-radius:12px;background:#0d1116}
+.android-home-search span{color:var(--muted);font-size:20px}
+.android-home-search input{width:100%;min-width:0;border:0!important;background:transparent!important;padding:9px 0!important;outline:0;color:var(--text)}
+.android-creation-count{min-width:42px;height:42px;padding:0 8px;border-radius:12px;display:grid;place-items:center;background:#1a222b;color:var(--accent);font-size:11px;font-weight:800;border:1px solid #34404d}
+.android-no-results{padding:18px 10px;text-align:center;color:var(--muted);border:1px dashed #37414d;border-radius:12px;margin-top:8px}
