@@ -37,6 +37,8 @@
                 <data android:mimeType="image/png" />
                 <data android:mimeType="application/json" />
                 <data android:mimeType="text/json" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/octet-stream" />
             </intent-filter>
 
             <intent-filter>
@@ -45,6 +47,8 @@
                 <data android:mimeType="image/png" />
                 <data android:mimeType="application/json" />
                 <data android:mimeType="text/json" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/octet-stream" />
             </intent-filter>
         </activity>
 

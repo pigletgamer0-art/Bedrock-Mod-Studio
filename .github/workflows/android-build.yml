@@ -3,7 +3,7 @@ name: Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [android-package-import-v2]
     paths:
       - 'android/**'
       - 'index.html'
