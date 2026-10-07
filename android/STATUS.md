@@ -30,7 +30,7 @@ Android solo se marca 100% cuando se cumplan TODOS estos gates:
 
 La mayoría de las funciones Android ya están implementadas y el primer APK debug ya compiló correctamente en GitHub Actions. Aún faltan instalación y pruebas funcionales en un dispositivo real.
 
-**Implementación de funciones:** aproximadamente 80%.
+**Implementación de funciones:** aproximadamente 90%.
 **Verificación real end-to-end:** aproximadamente 70%.
 
 No se debe reportar 100% hasta tener APK y pruebas reales.
@@ -105,3 +105,21 @@ Requiere cuatro GitHub Secrets:
 - `BMS_KEY_PASSWORD`
 
 La clave release NO se guarda en el repo. El workflow compila `assembleRelease`, verifica la firma con `apksigner`, genera SHA-256 y publica el artifact.
+
+
+## Android v0.1.3 Alpha — Home y biblioteca
+
+Implementado y ya dentro de main:
+
+- Inicio Android “Lo que has creado”.
+- Botón + con creación ordenada por contenido, gameplay/lógica, visual y proyecto.
+- Buscador y contador de creaciones.
+- Lista de texturas guardadas.
+- Mis proyectos: copias internas persistentes, abrir, eliminar, tamaño y fecha.
+- Guardar actual sin llenar Descargas.
+- Biblioteca sin límite artificial de 12 filas y lectura segura hasta 16 MB por proyecto.
+- Autosave y biblioteca usan capturas separadas para no pisarse.
+- .mctemplate entra en el mismo handoff a Minecraft que .mcaddon, .mcpack y .mcworld.
+- Firma Alpha debug estable para poder actualizar builds de prueba sin cambiar certificado.
+- APK CI valida ZIP, DEX, manifiesto y assets antes de publicarlo.
+- Smoke test de emulador corregido para ejecutar con /bin/sh; pendiente resultado de la nueva corrida.
