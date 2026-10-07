@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#15181d" />
+  <title>Bedrock Mod Studio</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-cube">B</div>
+        <div>
+          <strong>Bedrock Mod Studio</strong>
+          <small>v0.6 Alpha</small>
+        </div>
+      </div>
+
+      <button class="primary wide" id="newProjectBtn">+ Nuevo proyecto</button>
+      <div class="project-kind-card">
+        <small>TIPO DE PROYECTO</small>
+        <b id="projectTypeLabel">Add-On completo</b>
+        <span id="projectTypeHint">Behavior + Resource Pack</span>
+        <button id="changeProjectTypeBtn">Cambiar tipo</button>
+      </div>
+
+      <div class="panel-title">Proyecto</div>
+      <div class="project-meta compact">
+        <label>Nombre<input id="projectName" value="Mi Add-On" /></label>
+        <label>Namespace<input id="namespace" value="mimod" /></label>
+        <label>Versi√≥n Bedrock<input id="minEngineVersion" value="1.26.0" /></label>
+      </div>
+
+      <div class="panel-title row-between"><span>Archivos</span><button class="icon-btn" id="refreshTreeBtn" title="Actualizar">‚Üª</button></div>
+      <div id="fileTree" class="file-tree"></div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <nav class="tabs" aria-label="Secciones principales">
+          <button class="tab active" data-tab="designer">Dise√±o</button>
+          <button class="tab" data-tab="pixel">Pixel Art</button>
+          <button class="tab" data-tab="code">C√≥digo</button>
+          <button class="tab" data-tab="inspect">Inspector</button>
+        </nav>
+        <div class="actions">
+          <button id="loadProjectBtn">Abrir proyecto</button>
+          <input id="loadProjectInput" type="file" accept=".json,.bmsproject.json" hidden>
+          <input id="importGeoInput" type="file" accept=".json,.geo.json" hidden>
+          <button id="saveProjectBtn">Guardar proyecto</button>
+          <button class="primary" id="exportBtn">Exportar .mcaddon</button>
+        </div>
+      </header>
+
+      <section class="tab-page active" id="designer">
+        <div class="hero">
+          <div>
+            <span class="eyebrow">CREADOR BEDROCK TODO-EN-UNO</span>
+            <h1>Construye contenido sin salir del proyecto.</h1>
+            <p>Genera Behavior Pack + Resource Pack, dibuja texturas, edita JSON/JavaScript y manda modelos a Blockbench.</p>
+          </div>
+          <div class="hero-status">
+            <span class="dot ok"></span>
+            <div><b id="projectStatus">Proyecto listo</b><small id="projectCount">0 archivos generados</small></div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <article class="card">
+            <div class="card-head"><div><span class="eyebrow">CONTENIDO</span><h2>Crear elemento</h2></div></div>
+            <div class="create-grid">
+              <button class="create-card" data-create="item"><span>üó°Ô∏è</span><b>Objeto</b><small>items/*.json + textura</small></button>
+              <button class="create-card" data-create="block"><span>üß±</span><b>Bloque</b><small>blocks/*.json</small></button>
+              <button class="create-card" data-create="entity"><span>üêæ</span><b>Entidad</b><small>BP + RP + modelo</small></button>
+              <button class="create-card" data-create="script"><span>‚öôÔ∏è</span><b>Script</b><small>scripts/main.js</small></button>
+              <button class="create-card" data-create="recipe"><span>üß™</span><b>Receta</b><small>recipes/*.json</small></button>
+              <button class="create-card" data-create="loot"><span>üéÅ</span><b>Loot table</b><small>loot_tables/*.json</small></button>
+              <button class="create-card" data-create="spawn"><span>üå±</span><b>Spawn rules</b><small>spawn_rules/*.json</small></button>
+              <button class="create-card quick-tool" data-open-tool="pixel"><span>üé®</span><b>Textura</b><small>PNG suelto o para el pack</small></button>
+              <button class="create-card quick-tool" data-open-tool="model"><span>üßä</span><b>Modelo</b><small>geometry + animaci√≥n</small></button>
+            </div>
+            <div id="contentList" class="content-list empty-state">A√∫n no has creado contenido.</div>
+          </article>
+
+          <article class="card model-card">
+            <div class="card-head">
+              <div><span class="eyebrow">MODELO 3D</span><h2>Modelador Bedrock</h2></div>
+              <div class="toolbar"><button id="importGeoBtn">Importar .geo.json</button><button id="openBlockbenchBtn">Blockbench ‚Üó</button></div>
+            </div>
+            <div class="model-layout advanced-model-layout">
+              <div>
+                <div class="model-preview canvas-model-preview"><canvas id="modelCanvas" width="720" height="420"></canvas></div>
+                <div class="model-view-controls">
+                  <label>Rotaci√≥n Y <input id="modelYaw" type="range" min="-180" max="180" value="35"></label>
+                  <label>Rotaci√≥n X <input id="modelPitch" type="range" min="-80" max="80" value="-20"></label>
+                </div>
+              </div>
+              <div class="model-controls">
+                <label>Entidad/modelo <select id="modelEntitySelect"></select></label><label>Textura W/H<div class="triple two"><input id="modelTexW" type="number" min="1" max="4096" value="64"><input id="modelTexH" type="number" min="1" max="4096" value="64"></div></label>
+                <div class="subpanel"><div class="row-between"><b>Jerarqu√≠a de huesos</b><span><button id="addBoneBtn">+ Hueso</button><button id="removeBoneBtn">‚àí</button></span></div><div id="boneTree" class="bone-tree"></div><label>Hueso seleccionado <select id="boneSelect"></select></label><label>Nombre <input id="boneName" value="root"></label><label>Padre <select id="boneParent"></select></label><label>Pivot X/Y/Z<div class="triple"><input id="bonePivotX" type="number" value="0"><input id="bonePivotY" type="number" value="0"><input id="bonePivotZ" type="number" value="0"></div></label></div>
+                <div class="subpanel"><div class="row-between"><b>Cubos</b><span><button id="addCubeBtn">+ Cubo</button><button id="duplicateCubeBtn">Duplicar</button><button id="mirrorCubeBtn">‚Üî Espejo X</button><button id="removeCubeBtn">‚àí</button></span></div><select id="cubeSelect"></select>
+                  <label>Origen X/Y/Z<div class="triple"><input id="cubeOX" type="number" value="-4"><input id="cubeOY" type="number" value="0"><input id="cubeOZ" type="number" value="-4"></div></label>
+                  <label>Tama√±o X/Y/Z<div class="triple"><input id="cubeSX" type="number" min="0.1" value="8"><input id="cubeSY" type="number" min="0.1" value="8"><input id="cubeSZ" type="number" min="0.1" value="8"></div></label>
+                  <label>Modo UV <select id="uvMode"><option value="box">Box UV</option><option value="faces">Por cara</option></select></label><label id="boxUvFields">UV U/V<div class="triple two"><input id="cubeU" type="number" value="0"><input id="cubeV" type="number" value="0"></div></label><div id="faceUvFields" class="face-uv-fields" hidden><label>Cara <select id="uvFace"><option value="north">Norte</option><option value="south">Sur</option><option value="east">Este</option><option value="west">Oeste</option><option value="up">Arriba</option><option value="down">Abajo</option></select></label><label>UV<div class="triple two"><input id="faceU" type="number" value="0"><input id="faceV" type="number" value="0"></div></label></div>
+                </div>
+                <button class="primary wide" id="generateModelBtn">Guardar geometry JSON</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card creator-lab-card" id="creatorLabCard">
+          <div class="card-head">
+            <div><span class="eyebrow">CREATOR LAB</span><h2>Recetas, loot y aparici√≥n</h2></div>
+            <div class="creator-lab-tabs">
+              <button class="lab-tab active" data-lab="recipe">üß™ Receta</button>
+              <button class="lab-tab" data-lab="loot">üéÅ Loot</button>
+              <button class="lab-tab" data-lab="spawn">üå± Spawn</button>
+            </div>
+          </div>
+          <div class="lab-page active" data-lab-page="recipe">
+            <div class="lab-grid">
+              <div class="subpanel">
+                <label>Nombre de archivo <input id="recipeName" value="mi_receta"></label>
+                <label>Tipo <select id="recipeType"><option value="shaped">Con forma (3√ó3)</option><option value="shapeless">Sin forma</option></select></label>
+                <label>Resultado <input id="recipeResult" value="minecraft:diamond" placeholder="namespace:item"></label>
+                <label>Cantidad <input id="recipeCount" type="number" min="1" max="64" value="1"></label>
+                <button class="primary wide" id="saveRecipeBtn">Crear / actualizar receta</button>
+              </div>
+              <div class="subpanel">
+                <b>Mesa 3√ó3</b><small class="muted">Escribe identificadores como minecraft:stick. En modo sin forma importa el contenido, no la posici√≥n.</small>
+                <div class="recipe-grid" id="recipeGrid">
+                  <input data-recipe-cell="0" placeholder="minecraft:..."><input data-recipe-cell="1" placeholder="minecraft:..."><input data-recipe-cell="2" placeholder="minecraft:...">
+                  <input data-recipe-cell="3" placeholder="minecraft:..."><input data-recipe-cell="4" placeholder="minecraft:..."><input data-recipe-cell="5" placeholder="minecraft:...">
+                  <input data-recipe-cell="6" placeholder="minecraft:..."><input data-recipe-cell="7" placeholder="minecraft:..."><input data-recipe-cell="8" placeholder="minecraft:...">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-page" data-lab-page="loot" hidden>
+            <div class="lab-grid">
+              <div class="subpanel">
+                <label>Nombre de tabla <input id="lootName" value="mi_loot"></label>
+                <label>Tiradas <input id="lootRolls" type="number" min="1" max="64" value="1"></label>
+                <button class="primary wide" id="saveLootBtn">Crear / actualizar loot table</button>
+              </div>
+              <div class="subpanel">
+                <b>Entradas</b><small class="muted">Una por l√≠nea: <code>minecraft:diamond,10</code>. El segundo n√∫mero es el peso.</small>
+                <textarea id="lootEntries" rows="7" spellcheck="false">minecraft:diamond,10
+minecraft:iron_ingot,25
+minecraft:bread,15</textarea>
+              </div>
+            </div>
+          </div>
+          <div class="lab-page" data-lab-page="spawn" hidden3‡¢∆Fób6∆73“&∆"÷w&ñB#‡¢∆Fób6∆73“'7V'ÊV¬#‡¢∆∆&V√‰VÁFñFB∆ñÁWBñC“'7v‰VÁFóGí"∆ó7C“'7v‰VÁFóGî∆ó7B"f«VS“&÷ñ÷ˆCß&ˆ&˜B"∆6VÜˆ∆FW#“&Ê÷W76S¶VÁFñFB#„∆FF∆ó7BñC“'7v‰VÁFóGî∆ó7B#„¬ˆFF∆ó7C„¬ˆ∆&V√‡¢∆∆&V√Â˜V∆Fñˆ‚6ˆÁG&ˆ¬«6V∆V7BñC“'7vÂ˜V∆Fñˆ‚#„∆˜Fñˆ‚f«VS“&Êñ÷¬#ÊÊñ÷√¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“&÷ˆÁ7FW"#Ê÷ˆÁ7FW#¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“'vFW%ˆÊñ÷¬#ÁvFW%ˆÊñ÷√¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“'vFW%ˆ÷&ñVÁB#ÁvFW%ˆ÷&ñVÁC¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“&÷&ñVÁB#Ê÷&ñVÁC¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“'ñ∆∆vW"#Áñ∆∆vW#¬ˆ˜Fñˆ„„¬˜6V∆V7C„¬ˆ∆&V√‡¢∆∆&V√‰«Vv"«6V∆V7BñC“'7v‰∆ˆ6Fñˆ‚#„∆˜Fñˆ‚f«VS“'7W&f6R#Â7WW&fñ6ñS¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“'VÊFW&w&˜VÊB#Â7V'FW',:ÊVÛ¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“'VÊFW'vFW"#‰&¶ÚV¬wV¬ˆ˜Fñˆ„„¬˜6V∆V7C„¬ˆ∆&V√‡¢¬ˆFóc‡¢∆Fób6∆73“'7V'ÊV¬#‡¢∆∆&V√ÂW6Ú∆ñÁWBñC“'7vÂvVñváB"GóS“&ÁV÷&W""÷ñ„“#"÷É“#"f«VS“##„¬ˆ∆&V√‡¢∆∆&V√‰«W¢‹:÷Êñ÷ˆ‹:Üñ÷∆Fób6∆73“'G&ó∆RGvÚ#„∆ñÁWBñC“'7v‰∆ñváD÷ñ‚"GóS“&ÁV÷&W""÷ñ„“#"÷É“#R"f«VS“#r#„∆ñÁWBñC“'7v‰∆ñváD÷Ç"GóS“&ÁV÷&W""÷ñ„“#"÷É“#R"f«VS“#R#„¬ˆFóc„¬ˆ∆&V√‡¢∆∆&V√‰w'WÚ‹:÷Êñ÷Úˆ‹:Üñ÷Ú∆Fób6∆73“'G&ó∆RGvÚ#„∆ñÁWBñC“'7v‰ÜW&D÷ñ‚"GóS“&ÁV÷&W""÷ñ„“#"÷É“#b"f«VS“##„∆ñÁWBñC“'7v‰ÜW&D÷Ç"GóS“&ÁV÷&W""÷ñ„“#"÷É“#b"f«VS“#2#„¬ˆFóc„¬ˆ∆&V√‡¢∆'WGFˆ‚6∆73“'&ñ÷'ívñFR"ñC“'6fU7v‰'F‚#‰7&V"Ú7GV∆ó¶"7v‚'V∆W3¬ˆ'WGFˆ„‡¢¬ˆFóc‡¢¬ˆFóc‡¢¬ˆFóc‡¢¬ˆ'Fñ6∆S‡†¢∆'Fñ6∆R6∆73“&6&BWb÷6&B#‡¢∆Fób6∆73“&6&B÷ÜVB#„∆Fóc„«7‚6∆73“&WñV'&˜r#ÂUb5ETDîÛ¬˜7„„∆É#‰÷Ubfó7V√¬ˆÉ#„¬ˆFóc„∆Fób6∆73“'Fˆˆ∆&"#„∆'WGFˆ‚ñC“&WFıWd'F‚#‰WFÚUc¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“'6VÊEFWáGW&T'F‚#‰VFóF"FWáGW&FV¬÷ˆFV∆Û¬ˆ'WGFˆ„„¬ˆFóc„¬ˆFóc‡¢∆Fób6∆73“'Wb÷∆ñ˜WB#‡¢∆Fób6∆73“'Wb÷6Áf2◊w&#„∆6Áf2ñC“'Wd6Áf2"vñGFÉ“#cC"ÜVñváC“#cC#„¬ˆ6Áf3„¬ˆFóc‡¢∆Fób6∆73“'Wb÷ñÊfÚ#„«„∆#ÂFWáGW&£¬ˆ#‚«7‚ñC“'WeFWáGW&T∆&V¬#„cL9scC¬˜7„„¬˜„«Â6V∆V66ñˆÊ∆#ÂUb˜"6&¬ˆ#‚íFˆ6V¬÷&6ˆ∆ˆ6"∆6&V∆VvñF‚V¬F÷;Ú6R6∆7V∆FW6FRV¬7V&Ú„¬˜„∆FóbñC“'Wdf6U7V÷÷'í"6∆73“'Wb◊7V÷÷'í#„¬ˆFóc„¬ˆFóc‡¢¬ˆFóc‡¢¬ˆ'Fñ6∆S‡†¢∆'Fñ6∆R6∆73“&6&BÊñ÷Fñˆ‚÷6&B#‡¢∆Fób6∆73“&6&B÷ÜVB#‡¢∆Fóc„«7‚6∆73“&WñV'&˜r#‰‰î‘4îÙ‰U3¬˜7„„∆É#ÂFñ÷V∆ñÊR˜"áVW6˜3¬ˆÉ#„¬ˆFóc‡¢∆Fób6∆73“'Fˆˆ∆&"#„∆'WGFˆ‚ñC“&ÊWtÊñ÷Fñˆ‰'F‚#‚≤Êñ÷6ú;6„¬ˆ'WGFˆ„„∆'WGFˆ‚6∆73“'&ñ÷'í"ñC“&vVÊW&FTÊñ÷Fñˆ‰'F‚#‰wV&F"íVÊ∆¶#¬ˆ'WGFˆ„„¬ˆFóc‡¢¬ˆFóc‡¢∆Fób6∆73“&Êñ÷Fñˆ‚◊&ˆ¶V7B÷w&ñB#‡¢∆Fób6∆73“&Êñ÷Fñˆ‚◊&˜W'FñW2#‡¢∆∆&V√‰Êñ÷6ú;6‚«6V∆V7BñC“&Êñ÷FñˆÂ6V∆V7B#„¬˜6V∆V7C„¬ˆ∆&V√‡¢∆∆&V√‰Êˆ÷'&R∆ñÁWBñC“&Êñ÷Fñˆ‰Ê÷R"f«VS“&ñF∆R#„¬ˆ∆&V√‡¢∆∆&V√‰GW&6ú;6‚á2í∆ñÁWBñC“&Êñ÷Fñˆ‰∆VÊwFÇ"GóS“&ÁV÷&W""÷ñ„“#„R"7FW“#„R"f«VS“##„¬ˆ∆&V√‡¢∆∆&V¬6∆73“&6ÜV6≤#„∆ñÁWBñC“&Êñ÷Fñˆ‰∆ˆ˜"GóS“&6ÜV6∂&˜Ç"6ÜV6∂VC‚&WWFó"V‚'V6∆S¬ˆ∆&V√‡¢∆Fób6∆73“'7V'ÊV¬∂Wñg&÷R÷VFóF˜"#‡¢∆Fób6∆73“'&˜r÷&WGvVV‚#„∆#‰∂Wñg&÷S¬ˆ#„«7‚ñC“'6V∆V7FVD∂Wñg&÷T∆&V¬"6∆73“&&FvR#‰ÁVWfÛ¬˜7„„¬ˆFóc‡¢∆∆&V√ÂFñV◊Úá2í∆ñÁWBñC“&∂Wñg&÷UFñ÷R"GóS“&ÁV÷&W""÷ñ„“#"7FW“#„R"f«VS“##„¬ˆ∆&V√‡¢∆∆&V√‰áVW6Ú«6V∆V7BñC“&Êñ÷Fñˆ‰&ˆÊR#„¬˜6V∆V7C„¬ˆ∆&V√‡¢∆∆&V√‰6Ê¬«6V∆V7BñC“&Êñ÷Fñˆ‰6ÜÊÊV¬#„∆˜Fñˆ‚f«VS“'&˜FFñˆ‚#Â&˜F6ú;6„¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“'˜6óFñˆ‚#Â˜6ñ6ú;6„¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“'66∆R#‰W66∆¬ˆ˜Fñˆ„„¬˜6V∆V7C„¬ˆ∆&V√‡¢∆∆&V√Âf∆˜"Çıíı£∆Fób6∆73“'G&ó∆R#„∆ñÁWBñC“&∂Wñg&÷UÇ"GóS“&ÁV÷&W""7FW“#„"f«VS“##„∆ñÁWBñC“&∂Wñg&÷Uí"GóS“&ÁV÷&W""7FW“#„"f«VS“##„∆ñÁWBñC“&∂Wñg&÷U¢"GóS“&ÁV÷&W""7FW“#„"f«VS“##„¬ˆFóc„¬ˆ∆&V√‡¢∆Fób6∆73“&∂Wñg&÷R÷7FñˆÁ2#„∆'WGFˆ‚ñC“&FD∂Wñg&÷T'F‚#‚≤Ï;Fó#¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“'WFFT∂Wñg&÷T'F‚#‰7GV∆ó¶#¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“&GW∆ñ6FT∂Wñg&÷T'F‚#‰GW∆ñ6#¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“&FV∆WFT∂Wñg&÷T'F‚#‰V∆ñ÷ñÊ#¬ˆ'WGFˆ„„¬ˆFóc‡¢¬ˆFóc‡¢¬ˆFóc‡¢∆Fób6∆73“'Fñ÷V∆ñÊR◊ÊV¬#‡¢∆Fób6∆73“'Fñ÷V∆ñÊR◊Fˆˆ∆&"#‡¢∆'WGFˆ‚ñC“'∆îÊñ÷Fñˆ‰'F‚#Ó)kb&W&ˆGV6ó#¬ˆ'WGFˆ„‡¢∆'WGFˆ‚ñC“'7F˜Êñ÷Fñˆ‰'F‚#Ó)jFWFVÊW#¬ˆ'WGFˆ„‡¢«7„„∆"ñC“'Fñ÷V∆ñÊUFñ÷T∆&V¬#„„¬ˆ#Á2Ú«7‚ñC“'Fñ÷V∆ñÊT∆VÊwFÑ∆&V¬#„„¬˜7„Á3¬˜7„‡¢¬ˆFóc‡¢∆ñÁWBñC“'Fñ÷V∆ñÊU67'V&&W""6∆73“'Fñ÷V∆ñÊR◊67'V&&W""GóS“'&ÊvR"÷ñ„“#"÷É“#"7FW“#„"f«VS“##‡¢∆FóbñC“'Fñ÷V∆ñÊU'V∆W""6∆73“'Fñ÷V∆ñÊR◊'V∆W"#„¬ˆFóc‡¢∆FóbñC“'Fñ÷V∆ñÊUG&6∑2"6∆73“'Fñ÷V∆ñÊR◊G&6∑2V◊Gí◊7FFR#‰;FR∂Wñg&÷W2&fW&∆˜2\:“„¬ˆFóc‡¢«6∆73“'Fñ÷V∆ñÊR÷ÜV«#‰∆˜2∂Wñg&÷W26RñÁFW'ˆ∆‚∆ñÊV∆÷VÁFR¬ñwV¬VRV¬6ó7FV÷FRÊñ÷6ú;6‚FR&VG&ˆ6≤‚Fˆ6V‚VÁFÚFV¬Fñ÷V∆ñÊR&VFóF&∆Ú„¬˜‡¢¬ˆFóc‡¢¬ˆFóc‡¢¬ˆ'Fñ6∆S‡†¢∆'Fñ6∆R6∆73“&6&Bf∆˜r÷6&B#‡¢∆Fób6∆73“&6&B÷ÜVB#„∆Fóc„«7‚6∆73“&WñV'&˜r#‰Ã94tî4dï5T√¬˜7„„∆É#‰&VÜfñ˜"f∆˜r(	B&˜F˜FóÛ¬ˆÉ#„¬ˆFóc„«7‚6∆73“&&FvR#‰vVÊW&•3¬˜7„„¬ˆFóc‡¢∆Fób6∆73“&f∆˜r#‡¢∆Fób6∆73“&ÊˆFRWfVÁB#„«6÷∆√‰5T‰DÛ¬˜6÷∆√„∆#‰ßVvF˜"&V6S¬ˆ#„¬ˆFóc‡¢∆Fób6∆73“&'&˜r#Ó(i#¬ˆFóc‡¢∆Fób6∆73“&ÊˆFR6ˆÊFóFñˆ‚#„«6÷∆√Â4ì¬˜6÷∆√„∆#‰W7L:V‚V¬˜fW'v˜&∆C¬ˆ#„¬ˆFóc‡¢∆Fób6∆73“&'&˜r#Ó(i#¬ˆFóc‡¢∆Fób6∆73“&ÊˆFR7Fñˆ‚#„«6÷∆√‰TÂDÙ‰4U3¬˜6÷∆√„∆#‰VÁfñ"÷VÁ6¶S¬ˆ#„¬ˆFóc‡¢∆'WGFˆ‚ñC“&vVÊW&FTf∆˜t'F‚#‰vVÊW&"67&óC¬ˆ'WGFˆ„‡¢¬ˆFóc‡¢¬ˆ'Fñ6∆S‡¢¬˜6V7Fñˆ„‡†¢«6V7Fñˆ‚6∆73“'F"◊vR"ñC“'óÜV¬#‡¢∆Fób6∆73“'óÜV¬÷∆ñ˜WB#‡¢∆'Fñ6∆R6∆73“&6&BóÜV¬÷6&B#‡¢∆Fób6∆73“&6&B÷ÜVB#‡¢∆Fóc„«7‚6∆73“&WñV'&˜r#ÂïÑT¬5ETDîÛ¬˜7„„∆É#‰VFóF˜"FRFWáGW&3¬ˆÉ#„¬ˆFóc‡¢∆Fób6∆73“'Fˆˆ∆&"#‡¢«6V∆V7BñC“&6Áf56ó¶R#„∆˜Fñˆ‚f«VS“#b#„l9sc¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“#3"#„3,9s3#¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“#cB#„cL9scC¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“##Ç#„#å9s#É¬ˆ˜Fñˆ„„¬˜6V∆V7C‡¢∆ñÁWBñC“&6ˆ∆˜%ñ6∂W""GóS“&6ˆ∆˜""f«VS“"3vCV62"FóF∆S“$6ˆ∆˜"#‡¢∆'WGFˆ‚6∆73“'Fˆˆ¬7FófR"FF◊Fˆˆ√“'VÊ6ñ¬#Ó)»˛˚àÚÃ:ó£¬ˆ'WGFˆ„‡¢∆'WGFˆ‚6∆73“'Fˆˆ¬"FF◊Fˆˆ√“&W&6W"#Ó( ≤vˆ÷¬ˆ'WGFˆ„‡¢∆'WGFˆ‚6∆73“'Fˆˆ¬"FF◊Fˆˆ√“&fñ∆¬#Ó)j2&V∆∆VÊÛ¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“'VÊFıóÜVƒ'F‚#Ó(kc¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“'&VFıóÜVƒ'F‚#Ó(ks¬ˆ'WGFˆ„„∆∆&V¬6∆73“&6ÜV6≤6ˆ◊7B÷6ÜV6≤#„∆ñÁWBñC“'7ñ÷÷WG'ïÇ"GóS“&6ÜV6∂&˜Ç#‚6ñ÷WG,:÷É¬ˆ∆&V√‡¢¬ˆFóc‡¢¬ˆFóc‡¢∆Fób6∆73“&6Áf2◊w&#„∆6Áf2ñC“'óÜVƒ6Áf2"vñGFÉ“#S""ÜVñváC“#S"#„¬ˆ6Áf3„¬ˆFóc‡¢∆Fób6∆73“'óÜV¬÷7FñˆÁ2#‡¢«6V∆V7BñC“'FWáGW&UF&vWB#„∆˜Fñˆ‚f«VS“&WFÚ#‰FW7FñÊÚWFˆ‹:Fñ6Û¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“&óFV◊2#‰ˆ&¶WF˜3¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“&&∆ˆ6∑2#‰&∆˜VW3¬ˆ˜Fñˆ„„∆˜Fñˆ‚f«VS“&VÁFóGí#‰VÁFñFBˆ÷ˆFV∆Û¬ˆ˜Fñˆ„„¬˜6V∆V7C‡¢∆ñÁWBñC“'FWáGW&TÊ÷R"f«VS“&÷ï˜FWáGW&"∆6VÜˆ∆FW#“&Êˆ÷'&U˜FWáGW&#‡¢∆'WGFˆ‚ñC“&6∆V$6Áf4'F‚#‰∆ñ◊ñ#¬ˆ'WGFˆ„‡¢∆'WGFˆ‚ñC“&ñ◊˜'EFWáGW&T'F‚#‰ñ◊˜'F"‰s¬ˆ'WGFˆ„„∆ñÁWBñC“&ñ◊˜'EFWáGW&TñÁWB"GóS“&fñ∆R"66WC“&ñ÷vR˜Êr"ÜñFFV„‡¢∆'WGFˆ‚ñC“'6fUFWáGW&T'F‚"6∆73“'&ñ÷'í#‰wV&F"FWáGW&‰s¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“&F˜vÊ∆ˆEFWáGW&T'F‚#‰FW66&v"‰s¬ˆ'WGFˆ„‡¢¬ˆFóc‡¢¬ˆ'Fñ6∆S‡¢∆'Fñ6∆R6∆73“&6&BñÊfÚ÷6&B#‡¢«7‚6∆73“&WñV'&˜r#ÂƒUD¬˜7„„∆É#‰6ˆ∆˜&W2,:ñF˜3¬ˆÉ#‡¢∆FóbñC“'∆WGFR"6∆73“'∆WGFR#„¬ˆFóc‡¢∆á#‡¢«„∆#‰FW7FñÊÛ£¬ˆ#‚∆6ˆFRñC“'FWáGW&UF&vWDÜñÁB#ÊWFˆ‹:Fñ6Û¬ˆ6ˆFS„¬˜‡¢«‰∆FWáGW&wV&FF6RñÊ6«WñRWFˆ‹:Fñ6÷VÁFRV‚V¬Ê÷6FFˆÊ„¬˜‡¢¬ˆ'Fñ6∆S‡¢¬ˆFóc‡¢¬˜6V7Fñˆ„‡†¢«6V7Fñˆ‚6∆73“'F"◊vR"ñC“&6ˆFR#‡¢∆Fób6∆73“&6ˆFR÷∆ñ˜WB#‡¢∆6ñFR6∆73“&6ˆFR÷fñ∆W2#„∆Fób6∆73“'ÊV¬◊FóF∆R#‰&6ÜófÚ&ñW'FÛ¬ˆFóc„«6V∆V7BñC“&6ˆFTfñ∆U6V∆V7B#„¬˜6V∆V7C„∆'WGFˆ‚ñC“&f˜&÷D6ˆFT'F‚#‰f˜&÷FV"•4Ù„¬ˆ'WGFˆ„„∆'WGFˆ‚ñC“&«î6ˆFT'F‚"6∆73“'&ñ÷'í#‰∆ñ6"6÷&ñ˜3¬ˆ'WGFˆ„„¬ˆ6ñFS‡¢∆'Fñ6∆R6∆73“&VFóF˜"÷6&B#„∆Fób6∆73“&VFóF˜"÷ÜVB#„«7‚ñC“&VFóF˜%FÇ#Â6ñ‚&6ÜófÛ¬˜7„„«7‚ñC“&VFóF˜$∆Êr"6∆73“&&FvR#ÂEÖC¬˜7„„¬ˆFóc„«FWáF&VñC“&6ˆFTVFóF˜""7V∆∆6ÜV6≥“&f«6R"∆6VÜˆ∆FW#“$7&VV‚&∆˜VR¬ˆ&¶WFÚ¬VÁFñFBÚ67&óB&VFóF"7R<;6FñvÚ‚#„¬˜FWáF&V„¬ˆ'Fñ6∆S‡¢¬ˆFóc‡¢¬˜6V7Fñˆ„‡†¢«6V7Fñˆ‚6∆73“'F"◊vR"ñC“&ñÁ7V7B#‡¢∆Fób6∆73“&w&ñBGvÚ#‡¢∆'Fñ6∆R6∆73“&6&B#‡¢∆Fób6∆73“&6&B÷ÜVB#„∆Fóc„«7‚6∆73“&WñV'&˜r#‰îÂ5T5Dı"$TE$Ù4≥¬˜7„„∆É#Âf∆ñF6ú;6‚FV¬&˜ñV7FÛ¬ˆÉ#„¬ˆFóc„∆'WGFˆ‚6∆73“'&ñ÷'í"ñC“''V‰ñÁ7V7F˜$'F‚#‰Ê∆ó¶#¬ˆ'WGFˆ„„¬ˆFóc‡¢∆FóbñC“&ñÁ7V7F˜%&W7V«G2"6∆73“'&W7V«G2#„∆Fób6∆73“'&W7V«BñÊfÚ#Ó(Kû˚àÚV¶V7WFV¬ñÁ7V7F˜"&&Wfó6"÷ÊñfW7G2¬•4Ù‚íVÊ∆6W2,:6ñ6˜2„¬ˆFóc„¬ˆFóc‡¢¬ˆ'Fñ6∆S‡¢∆'Fñ6∆R6∆73“&6&B#‡¢«7‚6∆73“&WñV'&˜r#‰UÖı%D4ú94„¬˜7„„∆É#ÂVWFRfñÊ√¬ˆÉ#‡¢«ñC“&Wá˜'DFW67&óFñˆ‚#‰V¬÷ˆFÚFB‘ˆ‚vVÊW&&VÜfñ˜"6≤≤&W6˜W&6R6≤í∆˜2V◊VWFV‚V‚∆6ˆFS‚Ê÷6FFˆ„¬ˆ6ˆFS‚„¬˜‡¢∆Fób6∆73“'7FG2#„∆Fóc„∆"ñC“'7FDfñ∆W2#„¬ˆ#„«6÷∆√Ê&6Üóf˜3¬˜6÷∆√„¬ˆFóc„∆Fóc„∆"ñC“'7FDß6ˆ‚#„¬ˆ#„«6÷∆√‰•4Ù„¬˜6÷∆√„¬ˆFóc„∆Fóc„∆"ñC“'7FEFWáGW&W2#„¬ˆ#„«6÷∆√ÁFWáGW&3¬˜6÷∆√„¬ˆFóc„¬ˆFóc‡¢∆Fób6∆73“&Wá˜'B÷w&ñB#‡¢∆'WGFˆ‚ñC“&Wá˜'D%'F‚#‰&VÜfñ˜"Ê÷76≥¬ˆ'WGFˆ„‡¢∆'WGFˆ‚ñC“&Wá˜'E%'F‚#Â&W6˜W&6RÊ÷76≥¬ˆ'WGFˆ„‡¢∆'WGFˆ‚ñC“&Wá˜'EFWáGW&T'F‚#ÂFWáGW&ÁÊs¬ˆ'WGFˆ„‡¢∆'WGFˆ‚ñC“&Wá˜'D÷ˆFVƒ'F‚#‰÷ˆFV∆ÚÊvVÚÊß6ˆ„¬ˆ'WGFˆ„‡¢∆'WGFˆ‚6∆73“'&ñ÷'í"ñC“&Wá˜'D'F„"#‰FB‘ˆ‚Ê÷6FFˆ„¬ˆ'WGFˆ„‡¢¬ˆFóc‡¢¬ˆ'Fñ6∆S‡¢¬ˆFóc‡¢¬˜6V7Fñˆ„‡¢¬ˆ÷ñ„‡¢¬ˆFóc‡†¢∆FóbñC“'&ˆ¶V7D∆VÊ6ÜW""6∆73“&÷ˆF¬÷&6∂G&˜"ÜñFFV„‡¢∆Fób6∆73“&÷ˆF¬&ˆ¶V7B÷∆VÊ6ÜW""&ˆ∆S“&Fñ∆ˆr"&ñ÷÷ˆF√“'G'VR"&ñ÷∆&V∆∆VF'ì“&∆VÊ6ÜW%FóF∆R#‡¢∆Fób6∆73“&6&B÷ÜVB#‡¢∆Fóc„«7‚6∆73“&WñV'&˜r#‰ÂTUdÚ$ıîT5DÛ¬˜7„„∆É"ñC“&∆VÊ6ÜW%FóF∆R#Ï+ı\:íVñW&W27&V#Û¬ˆÉ#„¬ˆFóc‡¢∆'WGFˆ‚ñC“&6∆˜6T∆VÊ6ÜW$'F‚"6∆73“&ñ6ˆ‚÷'F‚"&ñ÷∆&V√“$6W'&"#Ó)…S¬ˆ'WGFˆ„‡¢¬ˆFóc‡¢«6∆73“&∆VÊ6ÜW"÷6˜í#‰6F÷ˆFÚ&W&6ˆ∆Ú∆˜2&6Üóf˜2VRÊV6W6óF2‚VVFW26÷&ñ"FW7\:ó26ñ‚W&FW"GRG&&¶Ú„¬˜‡¢∆Fób6∆73“&∆VÊ6ÜW"÷w&ñB#‡¢∆'WGFˆ‚6∆73“&∆VÊ6ÜW"÷˜Fñˆ‚&V6ˆ÷÷VÊFVB"FF◊&ˆ¶V7B◊GóS“&FFˆ‚#„«7„Ô	˙zì¬˜7„„∆#‰÷ˆBÚFB‘ˆ‚6ˆ◊∆WFÛ¬ˆ#„«6÷∆√‰ˆ&¶WF˜2¬&∆˜VW2¬VÁFñFFW2¬67&óG2¬÷ˆFV∆˜2íFWáGW&2‚Wá˜'FÊ÷6FFˆ‚„¬˜6÷∆√„¬ˆ'WGFˆ„‡¢∆'WGFˆ‚6∆73“&∆VÊ6ÜW"÷˜Fñˆ‚"FF◊&ˆ¶V7B◊GóS“&V∆V÷VÁB#„«7„Ô	˙{¬˜7„„∆#ÂVÊ6ˆ∆6˜6¬ˆ#„«6÷∆√‰7&VVÊ;¶Êñ6ñW¶¢ˆ&¶WFÚ¬&∆˜VR¬VÁFñFB¬&V6WF¬∆ˆ˜BF&∆R¬7v‚'V∆RÚ67&óB„¬˜6÷∆√„¬ˆ'WGFˆ„‡¢∆'WGFˆ‚6∆73“&∆VÊ6ÜW"÷˜Fñˆ‚"FF◊&ˆ¶V7B◊GóS“'FWáGW&U˜6≤#„«7‚	˘kŒ˚àÛ¬˜7„„∆#Â6≤FRFWáGW&3¬ˆ#„«6÷∆√Â6ˆ∆Ú&W6˜W&6R6≤‚ñFV¬&&VV◊∆¶"Ú&WVÊó"◊V6Ü2FWáGW&2„¬˜6÷∆√„¬ˆ'WGFˆ„‡¢∆'WGFˆ‚6∆73“&∆VÊ6ÜW"÷˜Fñˆ‚"FF◊&ˆ¶V7B◊GóS“'FWáGW&R#„«7„Ô	¯ÍÉ¬˜7„„∆#ÂVÊFWáGW&¬ˆ#„«6÷∆√ÂóÜV¬'B6ñ‚6≤‚Wá˜'FFó&V7F÷VÁFRV‚‰r„¬˜6÷∆√„¬ˆ'WGFˆ„‡¢∆'WGFˆ‚6∆73“&∆VÊ6ÜW"÷˜Fñˆ‚"FF◊&ˆ¶V7B◊GóS“&÷ˆFV¬#„«7„Ô	˙x£¬˜7„„∆#‰÷ˆFV∆Ú≤Êñ÷6ú;6„¬ˆ#„«6÷∆√‰vVˆ÷WG'í•4Ù‚¬Ub¬FWáGW&íFñ÷V∆ñÊS≤Wá˜'FV¬÷ˆFV∆ÚÚV‚&W6˜W&6R6≤„¬˜6÷∆√„¬ˆ'WGFˆ„‡¢¬ˆFóc‡¢∆Fób6∆73“&∆VÊ6ÜW"÷fˆ˜FW"#„∆∆&V√‰Êˆ÷'&RñÊñ6ñ¬∆ñÁWBñC“&∆VÊ6ÜW%&ˆ¶V7DÊ÷R"f«VS“$÷í&˜ñV7FÚ#„¬ˆ∆&V√„¬ˆFóc‡¢¬ˆFóc‡¢¬ˆFóc‡†¢∆FóbñC“'Fˆ7B"6∆73“'Fˆ7B#„¬ˆFóc‡¢«67&óB7&3“&Êß2#„¬˜67&óC‡£¬ˆ&ˆGì‡£¬ˆáF÷√‡†
