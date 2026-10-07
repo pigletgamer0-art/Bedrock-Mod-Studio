@@ -5,3 +5,4 @@ captures/
 .externalNativeBuild/
 .cxx/
 app/bms-debug.keystore
+app/bms-release.keystore

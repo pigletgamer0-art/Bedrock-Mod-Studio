@@ -92,3 +92,16 @@ Su único objetivo es permitir instalar una nueva Alpha encima de la anterior si
 - Esta clave NO se usará para release/Play Store.
 - La futura firma release será privada y no se guardará en el repositorio.
 - SHA-256 del keystore debug: `332d6896a54e09032129b463edcb25b5b20181e0ff4040c8bd75425b9f0ea881`.
+
+
+## Pipeline release privado
+
+Se añadió `.github/workflows/android-release.yml`, manual y separado del build Alpha.
+
+Requiere cuatro GitHub Secrets:
+- `BMS_KEYSTORE_BASE64`
+- `BMS_KEYSTORE_PASSWORD`
+- `BMS_KEY_ALIAS`
+- `BMS_KEY_PASSWORD`
+
+La clave release NO se guarda en el repo. El workflow compila `assembleRelease`, verifica la firma con `apksigner`, genera SHA-256 y publica el artifact.

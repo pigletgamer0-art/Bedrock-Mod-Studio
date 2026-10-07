@@ -24,10 +24,24 @@ android {
                 keyPassword = "android"
             }
         }
+
+        create("release") {
+            val releaseKeystore = file("bms-release.keystore")
+            if (releaseKeystore.exists()) {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("BMS_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("BMS_KEY_ALIAS")
+                keyPassword = System.getenv("BMS_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
+            val releaseKeystore = file("bms-release.keystore")
+            if (releaseKeystore.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
