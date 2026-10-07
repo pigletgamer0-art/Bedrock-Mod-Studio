@@ -51,6 +51,16 @@ public final class AndroidBridge {
     }
 
     @JavascriptInterface
+    public boolean isMinecraftInstalled() {
+        try {
+            activity.getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    @JavascriptInterface
     public void beginFile(String fileName, String mimeType, boolean openAfter) {
         synchronized (lock) {
             clearPendingLocked();
@@ -291,20 +301,22 @@ public final class AndroidBridge {
 
     private void openExport(Uri uri, String fileName, String mime) {
         activity.runOnUiThread(() -> {
+            boolean minecraftPackage = isMinecraftPackage(fileName);
+            String resolvedMime = minecraftPackage ? "application/zip" : mime;
+
             Intent view = new Intent(Intent.ACTION_VIEW);
-            view.setDataAndType(uri, isMinecraftPackage(fileName) ? "application/octet-stream" : mime);
+            view.setDataAndType(uri, resolvedMime);
             view.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
             view.setClipData(ClipData.newRawUri("Bedrock Mod Studio export", uri));
 
-            if (isMinecraftPackage(fileName)) {
-                Intent minecraft = new Intent(view);
-                minecraft.setPackage("com.mojang.minecraftpe");
-                try {
-                    activity.startActivity(minecraft);
-                    return;
-                } catch (ActivityNotFoundException ignored) {
-                    // Minecraft may be absent or may not expose the matching activity on this build.
-                }
+            if (minecraftPackage && tryMinecraftIntent(view)) return;
+
+            if (minecraftPackage) {
+                Intent wildcard = new Intent(Intent.ACTION_VIEW);
+                wildcard.setDataAndType(uri, "*/*");
+                wildcard.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                wildcard.setClipData(ClipData.newRawUri("Bedrock Mod Studio export", uri));
+                if (tryMinecraftIntent(wildcard)) return;
             }
 
             try {
@@ -313,6 +325,17 @@ public final class AndroidBridge {
                 Toast.makeText(activity, "Archivo guardado, pero no encontré una app para abrirlo.", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private boolean tryMinecraftIntent(Intent source) {
+        Intent minecraft = new Intent(source);
+        minecraft.setPackage("com.mojang.minecraftpe");
+        try {
+            activity.startActivity(minecraft);
+            return true;
+        } catch (ActivityNotFoundException ignored) {
+            return false;
+        }
     }
 
     private void clearAutosavePendingLocked() {
@@ -367,7 +390,10 @@ public final class AndroidBridge {
 
     private static boolean isMinecraftPackage(String fileName) {
         String lower = fileName.toLowerCase(Locale.ROOT);
-        return lower.endsWith(".mcaddon") || lower.endsWith(".mcpack") || lower.endsWith(".mcworld");
+        return lower.endsWith(".mcaddon")
+                || lower.endsWith(".mcpack")
+                || lower.endsWith(".mcworld")
+                || lower.endsWith(".mctemplate");
     }
 
     private static String normalizeMime(String mime, String fileName) {
@@ -375,7 +401,7 @@ public final class AndroidBridge {
         String lower = fileName.toLowerCase(Locale.ROOT);
         if (lower.endsWith(".png")) return "image/png";
         if (lower.endsWith(".json")) return "application/json";
-        if (isMinecraftPackage(fileName)) return "application/octet-stream";
+        if (isMinecraftPackage(fileName)) return "application/zip";
         return "application/octet-stream";
     }
 

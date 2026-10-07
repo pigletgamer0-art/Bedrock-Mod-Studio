@@ -103,3 +103,11 @@ Este documento separa lo implementado de lo que todavía necesita prueba en un d
 - Mandar la app al fondo y volver: no debe aparecer una descarga visible por cada autosave.
 - Confirmar que Guardar proyecto manual sigue exportando el archivo normalmente.
 - Probar un proyecto cercano a 8 MB: si supera el límite de recuperación directa, la app no debe bloquearse.
+
+
+## Detección y entrega a Minecraft
+
+- Con Minecraft instalado, exportar .mcaddon y .mcpack: debe intentar abrir Minecraft directamente.
+- Repetir con .mcworld y .mctemplate cuando el editor soporte esos tipos.
+- Sin Minecraft instalado, la exportación debe conservar el archivo y mostrar el selector de apps/fallback.
+- Confirmar que la URI se comparte con permiso temporal de lectura y que Minecraft puede leer el ZIP.
