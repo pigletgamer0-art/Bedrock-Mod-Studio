@@ -1,9 +1,9 @@
-name: Android APK Build Branch
+name: Android APK
 
 on:
   workflow_dispatch:
   push:
-    branches: [android-apk-build]
+    branches: [main]
     paths:
       - 'android/**'
       - 'index.html'
